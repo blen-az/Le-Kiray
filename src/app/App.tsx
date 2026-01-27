@@ -9,14 +9,19 @@ const App: React.FC = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        console.log('App: Subscribing to auth changes...');
         const unsubscribe = subscribeToAuthChanges((user) => {
-            console.log('App: Auth change detected:', user ? `User ${user.id}` : 'No user');
             setCurrentUser(user);
             setLoading(false);
         });
         return () => unsubscribe();
     }, []);
+
+    // Create routes with current user context - memoized to prevent router recreation
+    // This must be called BEFORE the conditional return to satisfy Rules of Hooks
+    const router = useMemo(
+        () => createBrowserRouter(createRoutes(currentUser, setCurrentUser)),
+        [currentUser]
+    );
 
     if (loading) {
         return (
@@ -25,14 +30,8 @@ const App: React.FC = () => {
             </div>
         );
     }
-  
-  // Create routes with current user context - memoized to prevent router recreation
-  const router = useMemo(
-    () => createBrowserRouter(createRoutes(currentUser, setCurrentUser)),
-    [currentUser]
-  );
 
-  return <RouterProvider router={router} />;
+    return <RouterProvider router={router} />;
 };
 
 export default App;

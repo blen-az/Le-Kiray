@@ -13,14 +13,11 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-console.log('Firebase: Initializing with project:', firebaseConfig.projectId);
 const app = initializeApp(firebaseConfig);
-console.log('Firebase: App initialized');
 
 // Initialize services
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
-console.log('Firebase: Services initialized');
 
 export default app;

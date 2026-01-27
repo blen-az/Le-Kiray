@@ -110,13 +110,10 @@ export const getUserDoc = async (uid: string): Promise<any> => {
  * Subscribe to auth state changes
  */
 export const subscribeToAuthChanges = (callback: (user: User | null) => void) => {
-    console.log('AuthService: Setting up onAuthStateChanged listener...');
     return onAuthStateChanged(auth, async (firebaseUser) => {
-        console.log('AuthService: onAuthStateChanged event:', firebaseUser ? `UID ${firebaseUser.uid}` : 'null');
         if (firebaseUser) {
             try {
                 const userData = await getUserDoc(firebaseUser.uid);
-                console.log('AuthService: User data fetched:', userData ? 'found' : 'missing');
                 callback(mapFirebaseUserToAppUser(firebaseUser, userData));
             } catch (error) {
                 console.error('AuthService: Error fetching user doc:', error);
