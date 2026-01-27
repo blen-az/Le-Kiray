@@ -1,0 +1,8 @@
+
+{
+  "name": "Le'Kiray Marketplace",
+  "description": "Premium dark-themed marketplace for vehicle and heavy equipment rentals with AI-powered fleet consultation.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
