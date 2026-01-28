@@ -96,7 +96,7 @@ const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ agentId }) => {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+      <div className="grid grid-cols-2 gap-6 mb-10">
         <div className="bg-indigo-600 rounded-2xl p-6 shadow-lg shadow-indigo-500/20">
           <p className="text-indigo-200 text-xs font-black uppercase tracking-widest mb-2">Total Bookings</p>
           <p className="text-4xl font-black text-white">{stats.totalBookings}</p>

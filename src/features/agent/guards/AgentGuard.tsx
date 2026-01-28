@@ -19,7 +19,7 @@ const AgentGuard: React.FC<AgentGuardProps> = ({ children, user }) => {
   }
 
   // User is not an agent
-  if (user.role !== UserRole.AGENT) {
+  if (user.role !== UserRole.AGENT && user.role !== 'AGENT') {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
         <div className="bg-slate-900 border border-slate-800 rounded-3xl p-12 max-w-md text-center">
@@ -30,7 +30,7 @@ const AgentGuard: React.FC<AgentGuardProps> = ({ children, user }) => {
           </div>
           <h2 className="text-2xl font-black text-white mb-3">Access Denied</h2>
           <p className="text-slate-400 mb-8">
-            This area is reserved for registered fleet agents. Switch to Agent mode or apply for an agent account.
+            Current role: {user.role} | Expected: AGENT
           </p>
           <a 
             href="/"

@@ -15,6 +15,18 @@ export enum UserRole {
   ADMIN = 'ADMIN'
 }
 
+export enum AgentStatus {
+  PENDING = 'PENDING',
+  APPROVED = 'APPROVED',
+  SUSPENDED = 'SUSPENDED'
+}
+
+export enum InviteStatus {
+  SENT = 'SENT',
+  USED = 'USED',
+  EXPIRED = 'EXPIRED'
+}
+
 // ==================== STATUS TYPES ====================
 
 export type ListingStatus = 'draft' | 'pending_review' | 'active' | 'paused' | 'archived';
@@ -172,6 +184,29 @@ export interface Subscription {
   currentPeriodEnd: string;
   createdAt: string;
   updatedAt: string;
+}
+
+// ==================== INVITE & ONBOARDING TYPES ====================
+
+export interface AgentInvite {
+  id: string;
+  agentId: string;
+  email: string;
+  token: string;
+  status: InviteStatus;
+  expiresAt: string;
+  createdBy: string; // Admin ID
+  createdAt: string;
+  usedAt?: string;
+}
+
+export interface AuditLog {
+  id: string;
+  adminId: string;
+  agentId?: string;
+  action: 'CREATE_AGENT' | 'APPROVE_AGENT' | 'SUSPEND_AGENT' | 'RESEND_INVITE' | 'AGENT_ACTIVATED';
+  timestamp: string;
+  notes?: string;
 }
 
 // ==================== UTILITY TYPES ====================

@@ -15,11 +15,23 @@ const LoginPage: React.FC = () => {
     setError(null);
 
     try {
-      await login(email, password);
-      navigate('/');
+      const user = await login(email, password);
+      console.log('Login successful, user:', user.id, 'role:', user.role);
+      
+      // Route based on user role
+      let redirectPath = '/marketplace';
+      if (user.role === 'ADMIN') {
+        redirectPath = '/admin';
+      } else if (user.role === 'AGENT') {
+        redirectPath = '/agent/dashboard';
+      }
+      
+      console.log('Redirecting to:', redirectPath);
+      // Navigate immediately after successful login
+      navigate(redirectPath, { replace: true });
     } catch (err: any) {
+      console.error('Login error:', err.message);
       setError(err.message || 'Failed to login. Please check your credentials.');
-    } finally {
       setLoading(false);
     }
   };

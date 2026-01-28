@@ -1,32 +1,63 @@
 // Cloudinary configuration
 export const cloudinaryConfig = {
-    cloudName: import.meta.env.VITE_CLOUDINARY_CLOUD_NAME,
-    uploadPreset: import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET,
+    cloudName: import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'dk8e7zkrf',
+    uploadPreset: import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || "le'kiray",
 };
 
-// Cloudinary upload URL
-export const CLOUDINARY_UPLOAD_URL = `https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/image/upload`;
-
 /**
- * Upload an image to Cloudinary
- * @param file - The file to upload
- * @returns Promise with the upload result
+ * Upload image(s) to Cloudinary using unsigned upload
+ * @param files - File or FileList to upload
+ * @param onProgress - Optional callback for progress updates
+ * @returns Promise resolving to upload result
  */
-export async function uploadImage(file: File): Promise<CloudinaryUploadResult> {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('upload_preset', cloudinaryConfig.uploadPreset);
+export async function uploadToCloudinary(
+    files: File | FileList,
+    onProgress?: (progress: number) => void
+): Promise<CloudinaryUploadResult[]> {
+    const fileArray = files instanceof FileList ? Array.from(files) : [files];
+    const results: CloudinaryUploadResult[] = [];
 
-    const response = await fetch(CLOUDINARY_UPLOAD_URL, {
-        method: 'POST',
-        body: formData,
-    });
+    for (const file of fileArray) {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', cloudinaryConfig.uploadPreset);
+        formData.append('folder', 'lekiray');
 
-    if (!response.ok) {
-        throw new Error('Failed to upload image to Cloudinary');
+        try {
+            const response = await fetch(
+                `https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/image/upload`,
+                {
+                    method: 'POST',
+                    body: formData,
+                }
+            );
+
+            if (!response.ok) {
+                const error = await response.json();
+                console.error('❌ Upload failed:', error);
+                throw new Error(error.error?.message || 'Upload failed');
+            }
+
+            const result = await response.json();
+            console.log('✅ Image uploaded:', result.public_id);
+            results.push({
+                public_id: result.public_id,
+                secure_url: result.secure_url,
+                url: result.url,
+                width: result.width,
+                height: result.height,
+                format: result.format,
+                bytes: result.bytes,
+                created_at: result.created_at,
+                resource_type: result.resource_type,
+            });
+        } catch (error) {
+            console.error('Error uploading file:', error);
+            throw error;
+        }
     }
 
-    return response.json();
+    return results;
 }
 
 /**

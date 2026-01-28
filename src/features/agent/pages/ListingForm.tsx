@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { VehicleCategory, Listing, ListingStatus, isBookableCategory } from '../../../types';
 import { createListing, updateListing, getListing, validateListingForPublish } from '../../../services/listingService';
 import { canPublishListing } from '../../../services/subscriptionService';
+import { initCloudinaryWidget, openCloudinaryUploadWidget, CloudinaryUploadResult } from '../../../lib/cloudinary';
 
 interface ListingFormProps {
   agentId: string;
@@ -41,11 +42,24 @@ const ListingForm: React.FC<ListingFormProps> = ({ agentId, agentName }) => {
   });
 
   const [specInput, setSpecInput] = useState('');
+  const [widgetLoading, setWidgetLoading] = useState(false);
+  const [widgetReady, setWidgetReady] = useState(false);
 
   useEffect(() => {
     if (isEditing && id) {
       loadListing(id);
     }
+    // Initialize Cloudinary widget
+    setWidgetLoading(true);
+    initCloudinaryWidget()
+      .then(() => {
+        setWidgetReady(true);
+        setWidgetLoading(false);
+      })
+      .catch((error) => {
+        console.error('Failed to initialize Cloudinary widget:', error);
+        setWidgetLoading(false);
+      });
   }, [id, isEditing]);
 
   const loadListing = async (listingId: string) => {
@@ -81,6 +95,39 @@ const ListingForm: React.FC<ListingFormProps> = ({ agentId, agentName }) => {
     setFormData(prev => ({
       ...prev,
       specifications: prev.specifications?.filter((_, i) => i !== index) || [],
+    }));
+  };
+
+  const handleImageUpload = async () => {
+    setWidgetLoading(true);
+    try {
+      await openCloudinaryUploadWidget((error, result) => {
+        if (error) {
+          console.error('Upload error:', error);
+          setErrors(prev => [...prev, error?.message || 'Failed to upload image']);
+          return;
+        }
+
+        if (result?.event === 'success') {
+          const uploadResult = result.info as CloudinaryUploadResult;
+          setFormData(prev => ({
+            ...prev,
+            imageUrls: [...(prev.imageUrls || []), uploadResult.secure_url],
+          }));
+        }
+      });
+    } catch (error) {
+      console.error('Error opening widget:', error);
+      setErrors(prev => [...prev, 'Failed to open upload widget']);
+    } finally {
+      setWidgetLoading(false);
+    }
+  };
+
+  const handleRemoveImage = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      imageUrls: prev.imageUrls?.filter((_, i) => i !== index) || [],
     }));
   };
 
@@ -136,7 +183,7 @@ const ListingForm: React.FC<ListingFormProps> = ({ agentId, agentName }) => {
   }
 
   return (
-    <div className="p-8 max-w-4xl">
+    <div className="p-4 sm:p-6 md:p-8 max-w-4xl w-full mx-auto">
       {/* Header */}
       <div className="mb-8">
         <button 
@@ -148,7 +195,7 @@ const ListingForm: React.FC<ListingFormProps> = ({ agentId, agentName }) => {
           </svg>
           Back to Fleet
         </button>
-        <h1 className="text-3xl font-black text-white tracking-tight">
+        <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
           {isEditing ? 'Edit Listing' : 'Add New Vehicle'}
         </h1>
       </div>
@@ -171,13 +218,13 @@ const ListingForm: React.FC<ListingFormProps> = ({ agentId, agentName }) => {
           <label className="text-xs font-black text-slate-500 uppercase tracking-widest block mb-4">
             Category
           </label>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {CATEGORIES.map(cat => (
               <button
                 key={cat.value}
                 type="button"
                 onClick={() => handleChange('category', cat.value)}
-                className={`p-4 rounded-xl border text-left transition-all ${
+                className={`p-3 sm:p-4 rounded-xl border text-left transition-all ${
                   formData.category === cat.value
                     ? cat.value === VehicleCategory.EARTH_MOVING
                       ? 'border-amber-500 bg-amber-500/10'
@@ -201,7 +248,7 @@ const ListingForm: React.FC<ListingFormProps> = ({ agentId, agentName }) => {
         </div>
 
         {/* Basic Info */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           <div>
             <label className="text-xs font-black text-slate-500 uppercase tracking-widest block mb-2">
               Make *
@@ -211,7 +258,7 @@ const ListingForm: React.FC<ListingFormProps> = ({ agentId, agentName }) => {
               value={formData.make || ''}
               onChange={(e) => handleChange('make', e.target.value)}
               placeholder="e.g. Toyota, CAT"
-              className="w-full px-4 py-3 bg-slate-900 border border-slate-800 rounded-xl text-white placeholder-slate-600 focus:border-indigo-500 focus:outline-none"
+              className="w-full px-4 py-3 bg-slate-900 border border-slate-800 rounded-xl text-white placeholder-slate-600 focus:border-indigo-500 focus:outline-none text-sm"
             />
           </div>
           <div>
@@ -223,7 +270,7 @@ const ListingForm: React.FC<ListingFormProps> = ({ agentId, agentName }) => {
               value={formData.model || ''}
               onChange={(e) => handleChange('model', e.target.value)}
               placeholder="e.g. Land Cruiser, 336 Excavator"
-              className="w-full px-4 py-3 bg-slate-900 border border-slate-800 rounded-xl text-white placeholder-slate-600 focus:border-indigo-500 focus:outline-none"
+              className="w-full px-4 py-3 bg-slate-900 border border-slate-800 rounded-xl text-white placeholder-slate-600 focus:border-indigo-500 focus:outline-none text-sm"
             />
           </div>
           <div>
@@ -236,14 +283,14 @@ const ListingForm: React.FC<ListingFormProps> = ({ agentId, agentName }) => {
               onChange={(e) => handleChange('year', parseInt(e.target.value))}
               min="1990"
               max={new Date().getFullYear() + 1}
-              className="w-full px-4 py-3 bg-slate-900 border border-slate-800 rounded-xl text-white placeholder-slate-600 focus:border-indigo-500 focus:outline-none"
+              className="w-full px-4 py-3 bg-slate-900 border border-slate-800 rounded-xl text-white placeholder-slate-600 focus:border-indigo-500 focus:outline-none text-sm"
             />
           </div>
         </div>
 
         {/* Pricing (Cars/Vans only) */}
         {!isEarthMoving && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             <div>
               <label className="text-xs font-black text-slate-500 uppercase tracking-widest block mb-2">
                 Daily Rate (ETB) *
@@ -254,7 +301,7 @@ const ListingForm: React.FC<ListingFormProps> = ({ agentId, agentName }) => {
                 onChange={(e) => handleChange('dailyRate', parseInt(e.target.value))}
                 placeholder="e.g. 4500"
                 min="0"
-                className="w-full px-4 py-3 bg-slate-900 border border-slate-800 rounded-xl text-white placeholder-slate-600 focus:border-indigo-500 focus:outline-none"
+                className="w-full px-4 py-3 bg-slate-900 border border-slate-800 rounded-xl text-white placeholder-slate-600 focus:border-indigo-500 focus:outline-none text-sm"
               />
             </div>
             <div>
@@ -267,7 +314,7 @@ const ListingForm: React.FC<ListingFormProps> = ({ agentId, agentName }) => {
                 onChange={(e) => handleChange('weeklyRate', parseInt(e.target.value))}
                 placeholder="Optional discount rate"
                 min="0"
-                className="w-full px-4 py-3 bg-slate-900 border border-slate-800 rounded-xl text-white placeholder-slate-600 focus:border-indigo-500 focus:outline-none"
+                className="w-full px-4 py-3 bg-slate-900 border border-slate-800 rounded-xl text-white placeholder-slate-600 focus:border-indigo-500 focus:outline-none text-sm"
               />
             </div>
           </div>
@@ -301,24 +348,77 @@ const ListingForm: React.FC<ListingFormProps> = ({ agentId, agentName }) => {
           />
         </div>
 
+        {/* Images */}
+        <div>
+          <label className="text-xs font-black text-slate-500 uppercase tracking-widest block mb-2">
+            Images
+          </label>
+          <div className="mb-4">
+            <button
+              type="button"
+              onClick={handleImageUpload}
+              disabled={!widgetReady || widgetLoading}
+              className="w-full p-6 border-2 border-dashed border-slate-700 rounded-xl cursor-pointer hover:border-indigo-500 transition-colors bg-slate-900/50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <div className="flex flex-col items-center justify-center">
+                {widgetLoading ? (
+                  <>
+                    <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mb-2" />
+                    <p className="text-white font-bold text-sm">Loading upload widget...</p>
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-10 h-10 text-slate-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <p className="text-white font-bold text-sm">Click to upload images</p>
+                    <p className="text-slate-500 text-xs mt-1">PNG, JPG, WebP (up to 10MB each)</p>
+                  </>
+                )}
+              </div>
+            </button>
+          </div>
+
+          {formData.imageUrls && formData.imageUrls.length > 0 && (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+              {formData.imageUrls.map((url, i) => (
+                <div key={i} className="relative group">
+                  <img
+                    src={url}
+                    alt={`Vehicle image ${i + 1}`}
+                    className="w-full h-32 object-cover rounded-xl border border-slate-700"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveImage(i)}
+                    className="absolute -top-2 -right-2 w-6 h-6 bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
         {/* Specifications */}
         <div>
           <label className="text-xs font-black text-slate-500 uppercase tracking-widest block mb-2">
             Specifications
           </label>
-          <div className="flex gap-2 mb-3">
+          <div className="flex flex-col sm:flex-row gap-2 mb-3">
             <input
               type="text"
               value={specInput}
               onChange={(e) => setSpecInput(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleAddSpec()}
               placeholder="Add a spec (e.g. 4x4, Autopilot)"
-              className="flex-1 px-4 py-3 bg-slate-900 border border-slate-800 rounded-xl text-white placeholder-slate-600 focus:border-indigo-500 focus:outline-none"
+              className="flex-1 px-4 py-3 bg-slate-900 border border-slate-800 rounded-xl text-white placeholder-slate-600 focus:border-indigo-500 focus:outline-none text-sm"
             />
             <button
               type="button"
               onClick={handleAddSpec}
-              className="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold"
+              className="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold whitespace-nowrap text-sm"
             >
               Add
             </button>
@@ -345,12 +445,12 @@ const ListingForm: React.FC<ListingFormProps> = ({ agentId, agentName }) => {
         </div>
 
         {/* Actions */}
-        <div className="flex gap-4 pt-6 border-t border-slate-800">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-6 border-t border-slate-800">
           <button
             type="button"
             onClick={() => handleSubmit(false)}
             disabled={saving}
-            className="px-8 py-4 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold transition-colors disabled:opacity-50"
+            className="px-6 sm:px-8 py-3 sm:py-4 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold transition-colors disabled:opacity-50 text-sm sm:text-base"
           >
             Save as Draft
           </button>
@@ -358,7 +458,7 @@ const ListingForm: React.FC<ListingFormProps> = ({ agentId, agentName }) => {
             type="button"
             onClick={() => handleSubmit(true)}
             disabled={saving}
-            className="flex-1 px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+            className="flex-1 px-6 sm:px-8 py-3 sm:py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition-colors disabled:opacity-50 flex items-center justify-center gap-2 text-sm sm:text-base"
           >
             {saving && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
             {isEditing ? 'Update & Publish' : 'Publish Listing'}

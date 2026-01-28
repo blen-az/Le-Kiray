@@ -71,7 +71,7 @@ const AgentDashboard: React.FC<AgentDashboardProps> = ({ user }) => {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+      <div className="grid grid-cols-2 gap-6 mb-10">
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
           <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Fleet Usage</p>
           <p className="text-3xl font-black text-white">{stats.activeListings}<span className="text-lg text-slate-500">/{stats.maxListings}</span></p>
@@ -109,7 +109,7 @@ const AgentDashboard: React.FC<AgentDashboardProps> = ({ user }) => {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+      <div className="grid grid-cols-2 gap-8 mb-10">
         <Link 
           to="/agent/listings/new"
           className="bg-slate-900 border border-slate-800 hover:border-indigo-500 rounded-2xl p-8 flex items-center gap-6 transition-all group"

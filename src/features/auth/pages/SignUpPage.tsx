@@ -19,11 +19,16 @@ const SignUpPage: React.FC = () => {
     setError(null);
 
     try {
-      await signUp(email, password, name, role, role === UserRole.AGENT ? companyName : undefined);
-      navigate(role === UserRole.AGENT ? '/agent/profile' : '/marketplace');
+      const newUser = await signUp(email, password, name, role, role === UserRole.AGENT ? companyName : undefined);
+      console.log('Signup successful, user:', newUser.id);
+      const redirectPath = role === UserRole.AGENT ? '/agent/dashboard' : '/marketplace';
+      console.log('Redirecting to:', redirectPath);
+      
+      // Navigate immediately after successful signup
+      navigate(redirectPath, { replace: true });
     } catch (err: any) {
+      console.error('Signup error:', err.message);
       setError(err.message || 'Failed to create account.');
-    } finally {
       setLoading(false);
     }
   };

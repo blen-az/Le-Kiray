@@ -5,7 +5,7 @@ import {
     onAuthStateChanged,
     User as FirebaseUser
 } from 'firebase/auth';
-import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { auth, db } from '../lib/firebase';
 import { User, UserRole } from '../types';
 
@@ -40,7 +40,9 @@ export const signUp = async (
     companyName?: string
 ): Promise<User> => {
     try {
+        console.log('Starting signup process...');
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        console.log('User created in Firebase Auth:', userCredential.user.uid);
         const firebaseUser = userCredential.user;
 
         const userData = {
@@ -55,12 +57,16 @@ export const signUp = async (
         };
 
         // Create document in users collection
+        console.log('Saving user data to Firestore...');
         await setDoc(doc(db, USERS_COLLECTION, firebaseUser.uid), userData);
+        console.log('User data saved successfully');
 
         return mapFirebaseUserToAppUser(firebaseUser, userData);
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error during sign up:', error);
-        throw error;
+        console.error('Error code:', error.code);
+        console.error('Error message:', error.message);
+        throw new Error(error.message || 'Failed to create account. Please try again.');
     }
 };
 
@@ -69,19 +75,45 @@ export const signUp = async (
  */
 export const login = async (email: string, password: string): Promise<User> => {
     try {
+        console.log('Starting login for email:', email);
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        console.log('User authenticated:', userCredential.user.uid);
         const firebaseUser = userCredential.user;
 
-        // Fetch user data from Firestore
-        const userDoc = await getDoc(doc(db, USERS_COLLECTION, firebaseUser.uid));
+        // Fetch user data from Firestore by UID first
+        console.log('Fetching user data from Firestore...');
+        let userDoc = await getDoc(doc(db, USERS_COLLECTION, firebaseUser.uid));
 
+        // If not found by UID, try searching by email
         if (!userDoc.exists()) {
-            throw new Error('User document not found in Firestore');
+            console.log('User not found by UID, searching by email...');
+            const q = query(
+                collection(db, USERS_COLLECTION),
+                where('email', '==', firebaseUser.email)
+            );
+            const querySnapshot = await getDocs(q);
+            
+            if (querySnapshot.empty) {
+                console.warn('User document not found in Firestore, creating minimal user');
+                const minimalUser: User = {
+                    id: firebaseUser.uid,
+                    email: firebaseUser.email || '',
+                    name: 'User',
+                    role: UserRole.CONSUMER,
+                };
+                return minimalUser;
+            }
+            
+            userDoc = querySnapshot.docs[0];
         }
 
-        return mapFirebaseUserToAppUser(firebaseUser, userDoc.data());
-    } catch (error) {
+        const appUser = mapFirebaseUserToAppUser(firebaseUser, userDoc.data());
+        console.log('User logged in successfully, role:', appUser.role);
+        return appUser;
+    } catch (error: any) {
         console.error('Error during login:', error);
+        console.error('Error code:', error.code);
+        console.error('Error message:', error.message);
         throw error;
     }
 };
@@ -113,11 +145,52 @@ export const subscribeToAuthChanges = (callback: (user: User | null) => void) =>
     return onAuthStateChanged(auth, async (firebaseUser) => {
         if (firebaseUser) {
             try {
-                const userData = await getUserDoc(firebaseUser.uid);
-                callback(mapFirebaseUserToAppUser(firebaseUser, userData));
-            } catch (error) {
+                console.log('Auth state changed, fetching user doc for:', firebaseUser.uid);
+                let userData = await getUserDoc(firebaseUser.uid);
+                
+                // If not found by UID, try searching by email (for agents created via onboarding)
+                if (!userData && firebaseUser.email) {
+                    console.log('User not found by UID, searching by email...');
+                    const q = query(
+                        collection(db, USERS_COLLECTION),
+                        where('email', '==', firebaseUser.email)
+                    );
+                    const querySnapshot = await getDocs(q);
+                    
+                    if (!querySnapshot.empty) {
+                        userData = querySnapshot.docs[0].data();
+                        console.log('User found by email:', userData.role);
+                    }
+                }
+                
+                if (userData) {
+                    callback(mapFirebaseUserToAppUser(firebaseUser, userData));
+                } else {
+                    // User doc doesn't exist yet, create a minimal user from auth
+                    console.warn('User document not found, creating from auth data');
+                    const minimalUser: User = {
+                        id: firebaseUser.uid,
+                        email: firebaseUser.email || '',
+                        name: 'User',
+                        role: UserRole.CONSUMER,
+                    };
+                    callback(minimalUser);
+                }
+            } catch (error: any) {
                 console.error('AuthService: Error fetching user doc:', error);
-                callback(null); // Still call callback to clear loading state
+                // Even if Firestore is offline, allow the user to proceed with minimal data
+                if (error.code === 'failed-precondition' || error.message?.includes('offline')) {
+                    console.warn('Firestore offline, proceeding with auth-only user');
+                    const minimalUser: User = {
+                        id: firebaseUser.uid,
+                        email: firebaseUser.email || '',
+                        name: 'User',
+                        role: UserRole.CONSUMER,
+                    };
+                    callback(minimalUser);
+                } else {
+                    callback(null);
+                }
             }
         } else {
             callback(null);

@@ -1,9 +1,11 @@
-import React from 'react';
-import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { User } from '../../../types';
+import { logout } from '../../../services/authService';
 
 interface AgentLayoutProps {
   user: User;
+  onLogout?: () => void;
 }
 
 const navItems = [
@@ -16,28 +18,72 @@ const navItems = [
   { path: '/agent/profile', label: 'Profile', icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' },
 ];
 
-const AgentLayout: React.FC<AgentLayoutProps> = ({ user }) => {
+const AgentLayout: React.FC<AgentLayoutProps> = ({ user, onLogout }) => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      onLogout?.();
+      navigate('/');
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex">
+    <div className="min-h-screen bg-slate-950 flex flex-col md:flex-row">
+      {/* Mobile Menu Button */}
+      <button
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+        className="md:hidden p-4 text-slate-400 hover:text-white hover:bg-slate-800 m-4 rounded-xl flex items-center gap-2"
+      >
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={sidebarOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
+        </svg>
+        {sidebarOpen ? 'Close' : 'Menu'}
+      </button>
+
+      {/* Sidebar Backdrop */}
+      {sidebarOpen && (
+        <div
+          onClick={() => setSidebarOpen(false)}
+          className="fixed inset-0 bg-black/50 md:hidden z-40"
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className="w-64 bg-slate-900 border-r border-slate-800 flex flex-col">
+      <aside className={`fixed md:static top-0 left-0 h-screen md:h-auto w-64 bg-slate-900 border-r border-slate-800 flex flex-col transition-transform transform md:translate-x-0 z-50 ${
+        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+      }`}>
         {/* Header */}
         <div className="p-6 border-b border-slate-800">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-black">
-              FC
+          <div className="flex items-center gap-3 justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-black">
+                FC
+              </div>
+              <div>
+                <h2 className="font-black text-white text-sm">Fleet Command</h2>
+                <p className="text-[10px] text-slate-500 uppercase tracking-widest">Agent Dashboard</p>
+              </div>
             </div>
-            <div>
-              <h2 className="font-black text-white text-sm">Fleet Command</h2>
-              <p className="text-[10px] text-slate-500 uppercase tracking-widest">Agent Dashboard</p>
-            </div>
+            {/* Close button on mobile */}
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="md:hidden text-slate-400 hover:text-white"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 p-4 space-y-1">
+        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
           {navItems.map((item) => (
             <NavLink
               key={item.path}
@@ -53,7 +99,8 @@ const AgentLayout: React.FC<AgentLayoutProps> = ({ user }) => {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={item.icon} />
               </svg>
-              {item.label}
+              <span className="hidden md:inline">{item.label}</span>
+              <span className="md:hidden text-xs">{item.label}</span>
               {item.color === 'amber' && (
                 <span className="ml-auto w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
               )}
@@ -63,7 +110,7 @@ const AgentLayout: React.FC<AgentLayoutProps> = ({ user }) => {
 
         {/* User Info */}
         <div className="p-4 border-t border-slate-800">
-          <div className="flex items-center gap-3 p-3 bg-slate-950 rounded-xl">
+          <div className="flex items-center gap-3 p-3 bg-slate-950 rounded-xl mb-3">
             <div className="w-10 h-10 rounded-xl overflow-hidden bg-slate-800">
               <img 
                 src={user.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=Agent'} 
@@ -76,11 +123,20 @@ const AgentLayout: React.FC<AgentLayoutProps> = ({ user }) => {
               <p className="text-[10px] text-slate-500 uppercase tracking-widest">{user.companyName || 'Agent'}</p>
             </div>
           </div>
+          <button
+            onClick={handleLogout}
+            className="w-full px-4 py-2 bg-red-600/10 hover:bg-red-600/20 text-red-500 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            Logout
+          </button>
         </div>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 overflow-auto w-full md:w-auto">
         <Outlet />
       </main>
     </div>
