@@ -65,7 +65,7 @@ const AgentDashboard: React.FC = () => {
     <div className="p-8">
       {/* Header */}
       <div className="mb-10">
-        <h1 className="text-3xl font-black text-white tracking-tight">Welcome back, {user.name}</h1>
+        <h1 className="text-2xl font-black text-white tracking-tight">Welcome back, {user.name}</h1>
         <p className="text-slate-500 mt-1">{user.companyName || 'Fleet Command'} • Agent Dashboard</p>
       </div>
 

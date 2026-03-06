@@ -56,7 +56,7 @@ const MarketplaceHome: React.FC = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-12">
+    <div className="max-w-[1440px] mx-auto px-4 py-12">
       <div className="flex flex-col lg:flex-row gap-10">
         <aside className="w-full lg:w-72 shrink-0">
           <VehicleFilters 
@@ -70,7 +70,7 @@ const MarketplaceHome: React.FC = () => {
         <main className="flex-1">
           <div className="flex justify-between items-center mb-8">
             <div>
-              <h2 className="text-2xl font-black text-white">Marketplace</h2>
+              <h2 className="text-xl font-black text-white">Marketplace</h2>
               <p className="text-slate-400 text-sm">{filteredVehicles.length} results found</p>
             </div>
           </div>

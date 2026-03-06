@@ -14,7 +14,7 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout, onDashboard }) => {
 
   return (
     <nav className="bg-slate-950/80 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
+      <div className="max-w-[1440px] mx-auto px-4 h-20 flex items-center justify-between">
         <div 
           className="flex items-center gap-3 cursor-pointer group" 
           onClick={() => navigate('/')}
@@ -22,7 +22,7 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout, onDashboard }) => {
           <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-black text-xl group-hover:bg-indigo-500 transition-all group-hover:rotate-6 shadow-lg shadow-indigo-900/40">
             LK
           </div>
-          <span className="text-2xl font-black text-white tracking-tighter">Le'Kiray</span>
+          <span className="text-xl font-black text-white tracking-tighter">Le'Kiray</span>
         </div>
 
         <div className="hidden md:flex items-center gap-8">

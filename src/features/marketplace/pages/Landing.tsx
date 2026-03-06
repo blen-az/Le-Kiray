@@ -8,14 +8,14 @@ const Landing: React.FC = () => {
   return (
     <div className="relative overflow-hidden">
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[1000px] bg-indigo-500/10 rounded-full blur-[120px] -z-10"></div>
-      <div className="max-w-7xl mx-auto px-4 py-24 md:py-32 flex flex-col items-center text-center">
+      <div className="max-w-[1440px] mx-auto px-4 py-24 md:py-32 flex flex-col items-center text-center">
         <span className="px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-bold uppercase tracking-widest mb-8">
           The Unified Fleet Platform
         </span>
-        <h1 className="text-5xl md:text-7xl font-black text-white leading-tight mb-8">
+        <h1 className="text-4xl md:text-6xl font-black text-white leading-tight mb-8">
           Rent Any Vehicle.<br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-amber-400">Request Any Machine.</span>
         </h1>
-        <p className="max-w-2xl text-lg text-slate-400 mb-12">
+        <p className="max-w-2xl text-base text-slate-400 mb-12">
           Le'Kiray bridges the gap between everyday car rentals and heavy-duty construction equipment. One dashboard, two distinct worlds.
         </p>
         <div className="flex flex-col sm:flex-row gap-4">
