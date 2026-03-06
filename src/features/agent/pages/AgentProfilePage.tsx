@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { User, AgentProfile } from '../../../types';
+import { AgentProfile } from '../../../types';
 import { getAgentProfile, updateAgentProfile, createAgentProfile } from '../../../services/agentService';
+import { useAuth } from '../../../features/auth/context/AuthContext';
 
-interface AgentProfilePageProps {
-  user: User;
-}
-
-const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ user }) => {
+const AgentProfilePage: React.FC = () => {
+  const { currentUser: user } = useAuth();
+  
+  if (!user) return null;
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [profile, setProfile] = useState<AgentProfile | null>(null);

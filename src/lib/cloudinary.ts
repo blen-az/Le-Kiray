@@ -91,6 +91,64 @@ export function getCloudinaryUrl(
     return `https://res.cloudinary.com/${cloudinaryConfig.cloudName}/image/upload/${transformString}/${publicId}`;
 }
 
+/**
+ * Initialize Cloudinary Upload Widget by loading the script
+ */
+export async function initCloudinaryWidget(): Promise<void> {
+    if ((window as any).cloudinary) return;
+
+    return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = 'https://upload-widget.cloudinary.com/global/all.js';
+        script.type = 'text/javascript';
+        script.async = true;
+        script.onload = () => resolve();
+        script.onerror = () => reject(new Error('Failed to load Cloudinary widget script'));
+        document.body.appendChild(script);
+    });
+}
+
+/**
+ * Open the Cloudinary Upload Widget
+ */
+export async function openCloudinaryUploadWidget(
+    callback: (error: any, result: any) => void
+): Promise<void> {
+    if (!(window as any).cloudinary) {
+        await initCloudinaryWidget();
+    }
+
+    const widget = (window as any).cloudinary.createUploadWidget(
+        {
+            cloudName: cloudinaryConfig.cloudName,
+            uploadPreset: cloudinaryConfig.uploadPreset,
+            sources: ['local', 'url', 'camera'],
+            multiple: true,
+            defaultSource: 'local',
+            styles: {
+                palette: {
+                    window: '#020617',
+                    windowBorder: '#1e293b',
+                    tabIcon: '#6366f1',
+                    menuIcons: '#f1f5f9',
+                    textDark: '#020617',
+                    textLight: '#f1f5f9',
+                    link: '#6366f1',
+                    action: '#6366f1',
+                    inactiveTabIcon: '#475569',
+                    error: '#ef4444',
+                    inProgress: '#6366f1',
+                    complete: '#10b981',
+                    sourceBg: '#0f172a'
+                }
+            }
+        },
+        callback
+    );
+
+    widget.open();
+}
+
 // Types
 export interface CloudinaryUploadResult {
     public_id: string;

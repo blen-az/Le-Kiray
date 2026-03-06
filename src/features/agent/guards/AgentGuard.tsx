@@ -1,16 +1,17 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { User, UserRole } from '../../../types';
+import { UserRole } from '../../../types';
+import { useAuth } from '../../auth/context/AuthContext';
 
 interface AgentGuardProps {
   children: React.ReactNode;
-  user: User | null;
 }
 
 /**
  * Route guard that only allows Agent role users to access protected routes
  */
-const AgentGuard: React.FC<AgentGuardProps> = ({ children, user }) => {
+const AgentGuard: React.FC<AgentGuardProps> = ({ children }) => {
+  const { currentUser: user } = useAuth();
   const location = useLocation();
 
   // No user logged in
@@ -19,7 +20,7 @@ const AgentGuard: React.FC<AgentGuardProps> = ({ children, user }) => {
   }
 
   // User is not an agent
-  if (user.role !== UserRole.AGENT && user.role !== 'AGENT') {
+  if (user.role !== UserRole.AGENT) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
         <div className="bg-slate-900 border border-slate-800 rounded-3xl p-12 max-w-md text-center">

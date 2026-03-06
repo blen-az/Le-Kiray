@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Booking, BookingStatus } from '../../../types';
 import { getBookingsByAgent, updateBookingStatus } from '../../../services/bookingService';
-
-interface BookingsPageProps {
-  agentId: string;
-}
+import { useAuth } from '../../../features/auth/context/AuthContext';
 
 const STATUS_OPTIONS: { value: BookingStatus; label: string; color: string }[] = [
   { value: 'pending', label: 'Pending', color: 'amber' },
@@ -14,7 +11,11 @@ const STATUS_OPTIONS: { value: BookingStatus; label: string; color: string }[] =
   { value: 'cancelled', label: 'Cancelled', color: 'red' },
 ];
 
-const BookingsPage: React.FC<BookingsPageProps> = ({ agentId }) => {
+const BookingsPage: React.FC = () => {
+  const { currentUser: user } = useAuth();
+  const agentId = user?.id || '';
+  
+  if (!user) return null;
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<BookingStatus | 'all'>('all');

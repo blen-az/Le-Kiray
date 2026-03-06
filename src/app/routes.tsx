@@ -28,121 +28,115 @@ import AgentProfilePage from '../features/agent/pages/AgentProfilePage';
 import LoginPage from '../features/auth/pages/LoginPage';
 import SignUpPage from '../features/auth/pages/SignUpPage';
 
-// Helper to create routes with user context
-export const createRoutes = (
-  currentUser: User | null,
-  setCurrentUser: React.Dispatch<React.SetStateAction<User | null>>
-): RouteObject[] => {
-
-  return [
-    {
-      path: '/',
-      element: <AppShell currentUser={currentUser} onUserChange={setCurrentUser} />,
-      children: [
-        {
-          index: true,
-          element: <Landing />,
-        },
-        {
-          path: 'marketplace',
-          element: <MarketplaceHome />,
-        },
-        {
-          path: 'admin',
-          element: <AdminDashboardOverview />,
-        },
-        {
-          path: 'admin/agents',
-          element: <AdminAgentManagement />,
-        },
-        {
-          path: 'admin/listings',
-          element: <AdminListingModeration />,
-        },
-        {
-          path: 'admin/subscriptions',
-          element: <AdminSubscriptionOversight />,
-        },
-        {
-          path: 'admin/disputes',
-          element: <AdminDisputesReports />,
-        },
-        {
-          path: 'admin/audit-logs',
-          element: <AdminAuditLogs />,
-        },
-        {
-          path: 'admin/settings',
-          element: <AdminSystemSettings />,
-        },
-        {
-          path: 'admin/agents/new',
-          element: <AdminCreateAgentPage />,
-        },
-        {
-          path: 'login',
-          element: <LoginPage />,
-        },
-        {
-          path: 'signup',
-          element: <SignUpPage />,
-        },
-        {
-          path: 'agent/activate',
-          element: <AgentActivationPage />,
-        },
-      ],
-    },
-    // Agent Routes (Protected)
-    {
-      path: '/agent',
-      element: (
-        <AgentGuard user={currentUser}>
-          <AgentLayout user={currentUser!} onLogout={() => setCurrentUser(null)} />
-        </AgentGuard>
-      ),
-      children: [
-        {
-          index: true,
-          element: <Navigate to="dashboard" replace />,
-        },
-        {
-          path: 'dashboard',
-          element: currentUser ? <AgentDashboard user={currentUser} /> : null,
-        },
-        {
-          path: 'fleet',
-          element: currentUser ? <FleetManagement agentId={currentUser.id} /> : null,
-        },
-        {
-          path: 'listings/new',
-          element: currentUser ? <ListingForm agentId={currentUser.id} agentName={currentUser.name} /> : null,
-        },
-        {
-          path: 'listings/:id/edit',
-          element: currentUser ? <ListingForm agentId={currentUser.id} agentName={currentUser.name} /> : null,
-        },
-        {
-          path: 'bookings',
-          element: currentUser ? <BookingsPage agentId={currentUser.id} /> : null,
-        },
-        {
-          path: 'leads',
-          element: currentUser ? <LeadsPage agentId={currentUser.id} /> : null,
-        },
-        {
-          path: 'subscription',
-          element: currentUser ? <SubscriptionPage agentId={currentUser.id} /> : null,
-        },
-        {
-          path: 'analytics',
-          element: currentUser ? <AnalyticsPage agentId={currentUser.id} /> : null,
-        },
-        {
-          path: 'profile',
-          element: currentUser ? <AgentProfilePage user={currentUser} /> : null,
-        },
-      ],
-    },
-  ];
-};
+// Routes definition
+export const routes: RouteObject[] = [
+  {
+    path: '/',
+    element: <AppShell />,
+    children: [
+      {
+        index: true,
+        element: <Landing />,
+      },
+      {
+        path: 'marketplace',
+        element: <MarketplaceHome />,
+      },
+      {
+        path: 'admin',
+        element: <AdminDashboardOverview />,
+      },
+      {
+        path: 'admin/agents',
+        element: <AdminAgentManagement />,
+      },
+      {
+        path: 'admin/listings',
+        element: <AdminListingModeration />,
+      },
+      {
+        path: 'admin/subscriptions',
+        element: <AdminSubscriptionOversight />,
+      },
+      {
+        path: 'admin/disputes',
+        element: <AdminDisputesReports />,
+      },
+      {
+        path: 'admin/audit-logs',
+        element: <AdminAuditLogs />,
+      },
+      {
+        path: 'admin/settings',
+        element: <AdminSystemSettings />,
+      },
+      {
+        path: 'admin/agents/new',
+        element: <AdminCreateAgentPage />,
+      },
+      {
+        path: 'login',
+        element: <LoginPage />,
+      },
+      {
+        path: 'signup',
+        element: <SignUpPage />,
+      },
+      {
+        path: 'agent/activate',
+        element: <AgentActivationPage />,
+      },
+    ],
+  },
+  // Agent Routes (Protected)
+  {
+    path: '/agent',
+    element: (
+      <AgentGuard>
+        <AgentLayout />
+      </AgentGuard>
+    ),
+    children: [
+      {
+        index: true,
+        element: <Navigate to="dashboard" replace />,
+      },
+      {
+        path: 'dashboard',
+        element: <AgentDashboard />,
+      },
+      {
+        path: 'fleet',
+        element: <FleetManagement />,
+      },
+      {
+        path: 'listings/new',
+        element: <ListingForm />,
+      },
+      {
+        path: 'listings/:id/edit',
+        element: <ListingForm />,
+      },
+      {
+        path: 'bookings',
+        element: <BookingsPage />,
+      },
+      {
+        path: 'leads',
+        element: <LeadsPage />,
+      },
+      {
+        path: 'subscription',
+        element: <SubscriptionPage />,
+      },
+      {
+        path: 'analytics',
+        element: <AnalyticsPage />,
+      },
+      {
+        path: 'profile',
+        element: <AgentProfilePage />,
+      },
+    ],
+  },
+];

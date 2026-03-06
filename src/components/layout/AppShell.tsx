@@ -1,23 +1,17 @@
 import React from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
-import { User } from '../../types';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import AIAssistant from '../../features/ai/components/AIAssistant';
-import { logout } from '../../services/authService';
+import { useAuth } from '../../features/auth/context/AuthContext';
 
-interface AppShellProps {
-  currentUser: User | null;
-  onUserChange: (user: User | null) => void;
-}
-
-const AppShell: React.FC<AppShellProps> = ({ currentUser, onUserChange }) => {
+const AppShell: React.FC = () => {
+  const { currentUser, logout: authLogout } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
     try {
-      await logout();
-      onUserChange(null); // Clear the current user state
+      await authLogout();
       navigate('/');
     } catch (error) {
       console.error('Logout failed:', error);

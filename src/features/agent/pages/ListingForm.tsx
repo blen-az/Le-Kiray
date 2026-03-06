@@ -5,10 +5,7 @@ import { createListing, updateListing, getListing, validateListingForPublish } f
 import { canPublishListing } from '../../../services/subscriptionService';
 import { initCloudinaryWidget, openCloudinaryUploadWidget, CloudinaryUploadResult } from '../../../lib/cloudinary';
 
-interface ListingFormProps {
-  agentId: string;
-  agentName: string;
-}
+import { useAuth } from '../../../features/auth/context/AuthContext';
 
 const CATEGORIES = [
   { value: VehicleCategory.COMPACT, label: 'Compact Car', description: 'Small sedans and hatchbacks' },
@@ -18,7 +15,12 @@ const CATEGORIES = [
   { value: VehicleCategory.EARTH_MOVING, label: 'Earth Moving', description: 'Excavators, dozers, loaders' },
 ];
 
-const ListingForm: React.FC<ListingFormProps> = ({ agentId, agentName }) => {
+const ListingForm: React.FC = () => {
+  const { currentUser: user } = useAuth();
+  const agentId = user?.id || '';
+  const agentName = user?.name || '';
+  
+  if (!user) return null;
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isEditing = Boolean(id);
@@ -149,6 +151,13 @@ const ListingForm: React.FC<ListingFormProps> = ({ agentId, agentName }) => {
         const canPublish = await canPublishListing(agentId);
         if (!canPublish.allowed) {
           setErrors([canPublish.reason || 'Cannot publish listing']);
+          setSaving(false);
+          return;
+        }
+
+        // Check if agent is approved
+        if (!user.isApproved) {
+          setErrors(['Your account is pending approval. You can save as draft, but cannot publish yet.']);
           setSaving(false);
           return;
         }

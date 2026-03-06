@@ -1,27 +1,12 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import { User } from '../types';
-import { createRoutes } from './routes';
-import { subscribeToAuthChanges } from '../services/authService';
+import { AuthProvider, useAuth } from '../features/auth/context/AuthContext';
+import { routes } from './routes';
 
-const App: React.FC = () => {
-    const [currentUser, setCurrentUser] = useState<User | null>(null);
-    const [loading, setLoading] = useState(true);
+const router = createBrowserRouter(routes);
 
-    useEffect(() => {
-        const unsubscribe = subscribeToAuthChanges((user) => {
-            setCurrentUser(user);
-            setLoading(false);
-        });
-        return () => unsubscribe();
-    }, []);
-
-    // Create routes with current user context - memoized to prevent router recreation
-    // This must be called BEFORE the conditional return to satisfy Rules of Hooks
-    const router = useMemo(
-        () => createBrowserRouter(createRoutes(currentUser, setCurrentUser)),
-        [currentUser]
-    );
+const AppContent: React.FC = () => {
+    const { loading } = useAuth();
 
     if (loading) {
         return (
@@ -32,6 +17,14 @@ const App: React.FC = () => {
     }
 
     return <RouterProvider router={router} />;
+};
+
+const App: React.FC = () => {
+    return (
+        <AuthProvider>
+            <AppContent />
+        </AuthProvider>
+    );
 };
 
 export default App;

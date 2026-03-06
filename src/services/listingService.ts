@@ -107,7 +107,7 @@ export const createListing = async (
 ): Promise<Listing> => {
     try {
         // Enforce category rules
-        const listingData = enforceCategotyRules(data);
+        const listingData = enforceCategoryRules(data);
 
         const docRef = doc(collection(db, COLLECTION));
         const timestamp = new Date().toISOString();
@@ -140,7 +140,7 @@ export const updateListing = async (
         // If category is being updated, enforce rules
         let updateData = { ...data };
         if (data.category) {
-            updateData = enforceCategotyRules(updateData as Listing);
+            updateData = enforceCategoryRules(updateData as Listing);
         }
 
         await updateDoc(docRef, {
@@ -204,7 +204,7 @@ export const countActiveListings = async (agentId: string): Promise<number> => {
  * - EARTH_MOVING: Remove pricing fields
  * - Cars/Vans: Ensure pricing exists
  */
-const enforceCategotyRules = <T extends Partial<Listing>>(data: T): T => {
+const enforceCategoryRules = <T extends Partial<Listing>>(data: T): T => {
     const result = { ...data };
 
     if (data.category === VehicleCategory.EARTH_MOVING) {

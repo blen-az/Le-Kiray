@@ -25,7 +25,7 @@ export const mapFirebaseUserToAppUser = (
         role: (userData?.role as UserRole) || UserRole.CONSUMER,
         subscriptionTier: userData?.subscriptionTier,
         companyName: userData?.companyName,
-        isApproved: userData?.isApproved
+        isApproved: userData?.isApproved ?? (userData?.role === UserRole.CONSUMER), // Default true for consumers
     };
 };
 
@@ -92,7 +92,7 @@ export const login = async (email: string, password: string): Promise<User> => {
                 where('email', '==', firebaseUser.email)
             );
             const querySnapshot = await getDocs(q);
-            
+
             if (querySnapshot.empty) {
                 console.warn('User document not found in Firestore, creating minimal user');
                 const minimalUser: User = {
@@ -103,7 +103,7 @@ export const login = async (email: string, password: string): Promise<User> => {
                 };
                 return minimalUser;
             }
-            
+
             userDoc = querySnapshot.docs[0];
         }
 
@@ -147,7 +147,7 @@ export const subscribeToAuthChanges = (callback: (user: User | null) => void) =>
             try {
                 console.log('Auth state changed, fetching user doc for:', firebaseUser.uid);
                 let userData = await getUserDoc(firebaseUser.uid);
-                
+
                 // If not found by UID, try searching by email (for agents created via onboarding)
                 if (!userData && firebaseUser.email) {
                     console.log('User not found by UID, searching by email...');
@@ -156,13 +156,13 @@ export const subscribeToAuthChanges = (callback: (user: User | null) => void) =>
                         where('email', '==', firebaseUser.email)
                     );
                     const querySnapshot = await getDocs(q);
-                    
+
                     if (!querySnapshot.empty) {
                         userData = querySnapshot.docs[0].data();
                         console.log('User found by email:', userData.role);
                     }
                 }
-                
+
                 if (userData) {
                     callback(mapFirebaseUserToAppUser(firebaseUser, userData));
                 } else {

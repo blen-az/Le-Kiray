@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Subscription, SubscriptionPlan } from '../../../types';
 import { getSubscriptionUsage, getSubscriptionPlans, createSubscription } from '../../../services/subscriptionService';
+import { useAuth } from '../../../features/auth/context/AuthContext';
 
-interface SubscriptionPageProps {
-  agentId: string;
-}
-
-const SubscriptionPage: React.FC<SubscriptionPageProps> = ({ agentId }) => {
+const SubscriptionPage: React.FC = () => {
+  const { currentUser: user } = useAuth();
+  const agentId = user?.id || '';
+  
+  if (!user) return null;
   const [usage, setUsage] = useState<{
     subscription: Subscription | null;
     activeListings: number;

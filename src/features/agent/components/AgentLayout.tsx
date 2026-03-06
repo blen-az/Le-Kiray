@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { User } from '../../../types';
-import { logout } from '../../../services/authService';
+import { useAuth } from '../../auth/context/AuthContext';
 
 interface AgentLayoutProps {
   user: User;
@@ -18,15 +18,17 @@ const navItems = [
   { path: '/agent/profile', label: 'Profile', icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' },
 ];
 
-const AgentLayout: React.FC<AgentLayoutProps> = ({ user, onLogout }) => {
+const AgentLayout: React.FC = () => {
+  const { currentUser: user, logout: authLogout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  if (!user) return null;
+
   const handleLogout = async () => {
     try {
-      await logout();
-      onLogout?.();
+      await authLogout();
       navigate('/');
     } catch (error) {
       console.error('Error logging out:', error);

@@ -3,12 +3,13 @@ import { Link } from 'react-router-dom';
 import { Listing, ListingStatus, VehicleCategory, isBookableCategory } from '../../../types';
 import { getListingsByAgent, updateListingStatus } from '../../../services/listingService';
 import { canPublishListing } from '../../../services/subscriptionService';
+import { useAuth } from '../../../features/auth/context/AuthContext';
 
-interface FleetManagementProps {
-  agentId: string;
-}
-
-const FleetManagement: React.FC<FleetManagementProps> = ({ agentId }) => {
+const FleetManagement: React.FC = () => {
+  const { currentUser: user } = useAuth();
+  const agentId = user?.id || '';
+  
+  if (!user) return null;
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [publishInfo, setPublishInfo] = useState({ allowed: true, currentCount: 0, maxAllowed: 0 });

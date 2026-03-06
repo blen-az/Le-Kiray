@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { QuoteRequest, LeadStatus } from '../../../types';
 import { getLeadsByAgent, updateLeadStatus } from '../../../services/leadService';
-
-interface LeadsPageProps {
-  agentId: string;
-}
+import { useAuth } from '../../../features/auth/context/AuthContext';
 
 const STATUS_OPTIONS: { value: LeadStatus; label: string; color: string }[] = [
   { value: 'new', label: 'New', color: 'amber' },
@@ -15,7 +12,11 @@ const STATUS_OPTIONS: { value: LeadStatus; label: string; color: string }[] = [
   { value: 'closed', label: 'Closed', color: 'slate' },
 ];
 
-const LeadsPage: React.FC<LeadsPageProps> = ({ agentId }) => {
+const LeadsPage: React.FC = () => {
+  const { currentUser: user } = useAuth();
+  const agentId = user?.id || '';
+  
+  if (!user) return null;
   const [leads, setLeads] = useState<QuoteRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<LeadStatus | 'all'>('all');

@@ -3,14 +3,15 @@ import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, R
 import { getBookingsByAgent } from '../../../services/bookingService';
 import { getLeadsByAgent } from '../../../services/leadService';
 import { getSubscriptionUsage } from '../../../services/subscriptionService';
-import { countActiveListings, getListingsByAgent } from '../../../services/listingService';
+import { getListingsByAgent } from '../../../services/listingService';
 import { VehicleCategory } from '../../../types';
+import { useAuth } from '../../../features/auth/context/AuthContext';
 
-interface AnalyticsPageProps {
-  agentId: string;
-}
-
-const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ agentId }) => {
+const AnalyticsPage: React.FC = () => {
+  const { currentUser: user } = useAuth();
+  const agentId = user?.id || '';
+  
+  if (!user) return null;
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     totalBookings: 0,

@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { User, Booking, QuoteRequest } from '../../../types';
+import { Booking, QuoteRequest } from '../../../types';
 import { getBookingsByAgent } from '../../../services/bookingService';
 import { getLeadsByAgent, countNewLeads } from '../../../services/leadService';
 import { getSubscriptionUsage } from '../../../services/subscriptionService';
-import { countActiveListings } from '../../../services/listingService';
+import { useAuth } from '../../../features/auth/context/AuthContext';
 
-interface AgentDashboardProps {
-  user: User;
-}
-
-const AgentDashboard: React.FC<AgentDashboardProps> = ({ user }) => {
+const AgentDashboard: React.FC = () => {
+  const { currentUser: user } = useAuth();
+  
+  if (!user) return null;
   const [stats, setStats] = useState({
     activeListings: 0,
     maxListings: 0,
