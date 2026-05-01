@@ -1,0 +1,21 @@
+(node:25224) ExperimentalWarning: CommonJS module C:\Users\jacka\AppData\Roaming\npm\node_modules\npm\node_modules\debug\src\node.js is loading ES Module C:\Users\jacka\AppData\Roaming\npm\node_modules\npm\node_modules\supports-color\index.js using require().
+Support for loading ES Module in require() is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+src/app/App.tsx(3,50): error TS2307: Cannot find module '@tanstack/react-query' or its corresponding type declarations.
+src/data/mockData.ts(126,9): error TS2353: Object literal may only specify known properties, and 'vehicleId' does not exist in type 'Booking'.
+src/features/agent/pages/AgentDashboard.tsx(2,26): error TS2307: Cannot find module '@tanstack/react-query' or its corresponding type declarations.
+src/features/agent/pages/FleetManagement.tsx(2,42): error TS2307: Cannot find module '@tanstack/react-query' or its corresponding type declarations.
+src/features/agent/pages/ListingForm.tsx(70,5): error TS2322: Type 'Resolver<{ category: VehicleCategory; make: string; model: string; year: unknown; location: string; description: string; specifications: string[]; imageUrls: string[]; dailyRate?: unknown; weeklyRate?: unknown; status?: string; }, any, { ...; }>' is not assignable to type 'Resolver<{ category: VehicleCategory; make: string; model: string; year: number; location: string; description: string; specifications: string[]; imageUrls: string[]; dailyRate?: number; weeklyRate?: number; status?: string; }, any, { ...; }>'.
+  Types of parameters 'options' and 'options' are incompatible.
+    Type 'ResolverOptions<{ category: VehicleCategory; make: string; model: string; year: number; location: string; description: string; specifications: string[]; imageUrls: string[]; dailyRate?: number; weeklyRate?: number; status?: string; }>' is not assignable to type 'ResolverOptions<{ category: VehicleCategory; make: string; model: string; year: unknown; location: string; description: string; specifications: string[]; imageUrls: string[]; dailyRate?: unknown; weeklyRate?: unknown; status?: string; }>'.
+      Types of property 'names' are incompatible.
+        Type 'string[]' is not assignable to type '("status" | "location" | "model" | "category" | "description" | "make" | "year" | "dailyRate" | "weeklyRate" | "imageUrls" | "specifications")[]'.
+          Type 'string' is not assignable to type '"status" | "location" | "model" | "category" | "description" | "make" | "year" | "dailyRate" | "weeklyRate" | "imageUrls" | "specifications"'.
+src/features/agent/pages/ListingForm.tsx(165,39): error TS2339: Property 'submitter' does not exist on type 'object'.
+src/features/agent/pages/ListingForm.tsx(239,36): error TS2345: Argument of type '(data: ListingFormData, e?: React.BaseSyntheticEvent) => Promise<void>' is not assignable to parameter of type 'SubmitHandler<TFieldValues>'.
+  Types of parameters 'data' and 'data' are incompatible.
+    Type 'TFieldValues' is not assignable to type '{ category: VehicleCategory; make: string; model: string; year: number; location: string; description: string; specifications: string[]; imageUrls: string[]; dailyRate?: number; weeklyRate?: number; status?: string; }'.
+      Type 'FieldValues' is missing the following properties from type '{ category: VehicleCategory; make: string; model: string; year: number; location: string; description: string; specifications: string[]; imageUrls: string[]; dailyRate?: number; weeklyRate?: number; status?: string; }': category, make, model, year, and 4 more.
+src/features/marketplace/pages/MarketplaceHome.tsx(2,34): error TS2307: Cannot find module '@tanstack/react-query' or its corresponding type declarations.
+src/lib/index.ts(8,5): error TS2305: Module '"./cloudinary"' has no exported member 'uploadImage'.
+src/lib/index.ts(10,5): error TS2724: '"./cloudinary"' has no exported member named 'CLOUDINARY_UPLOAD_URL'. Did you mean 'CloudinaryUploadResult'?

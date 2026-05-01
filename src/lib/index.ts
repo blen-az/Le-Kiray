@@ -4,9 +4,8 @@ export type { User } from 'firebase/auth';
 
 // Cloudinary exports
 export {
-    cloudinaryConfig,
-    uploadImage,
-    getCloudinaryUrl,
-    CLOUDINARY_UPLOAD_URL,
+ cloudinaryConfig,
+ uploadToCloudinary as uploadImage,
+ getCloudinaryUrl,
 } from './cloudinary';
 export type { CloudinaryUploadResult } from './cloudinary';

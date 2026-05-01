@@ -1,38 +1,17 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Le'Kiray | Unified Heavy Marketplace</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
     rel="stylesheet">
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              dark: '#020617',
-              card: '#0f172a',
-              border: '#1e293b',
-              accent: '#6366f1',
-              equipment: '#f59e0b'
-            }
-          },
-          fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-          }
-        }
-      }
-    }
-  </script>
   <style>
     body {
-      background-color: #020617;
-      color: #f1f5f9;
+      background-color: #f8fafc;
+      color: #0f172a;
       -webkit-font-smoothing: antialiased;
     }
 
@@ -41,16 +20,16 @@
     }
 
     ::-webkit-scrollbar-track {
-      background: #020617;
+      background: #f1f5f9;
     }
 
     ::-webkit-scrollbar-thumb {
-      background: #1e293b;
+      background: #cbd5e1;
       border-radius: 4px;
     }
 
     ::-webkit-scrollbar-thumb:hover {
-      background: #334155;
+      background: #94a3b8;
     }
   </style>
   <link rel="stylesheet" href="/src/styles/globals.css">
@@ -64,13 +43,32 @@
   </div>
   <script>
     window.onerror = function (msg, url, lineNo, columnNo, error) {
+      // Ignore errors that don't originate from our application (e.g., browser extensions)
+      const isInternal = !url || 
+                        url.includes(window.location.host) || 
+                        url.startsWith('/') || 
+                        url.includes('src/') ||
+                        url.includes('vite');
+      
+      if (!isInternal) {
+        console.warn('Suppressed third-party error:', msg, 'at', url);
+        return false;
+      }
+
       var overlay = document.getElementById('error-overlay');
       var message = document.getElementById('error-message');
       overlay.style.display = 'block';
       message.textContent = 'Error: ' + msg + '\nFile: ' + url + '\nLine: ' + lineNo + '\nColumn: ' + columnNo + '\n\n' + (error ? error.stack : '');
       return false;
     };
+    
     window.onunhandledrejection = function (event) {
+      // Ignore rejections without a reason or from third-party sources
+      if (!event.reason || (event.reason.stack && !event.reason.stack.includes(window.location.host))) {
+         console.warn('Suppressed third-party promise rejection:', event.reason);
+         return;
+      }
+
       var overlay = document.getElementById('error-overlay');
       var message = document.getElementById('error-message');
       overlay.style.display = 'block';

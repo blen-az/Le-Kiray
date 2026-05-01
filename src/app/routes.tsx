@@ -27,116 +27,140 @@ import AnalyticsPage from '../features/agent/pages/AnalyticsPage';
 import AgentProfilePage from '../features/agent/pages/AgentProfilePage';
 import LoginPage from '../features/auth/pages/LoginPage';
 import SignUpPage from '../features/auth/pages/SignUpPage';
+import UserProfilePage from '../features/auth/pages/UserProfilePage';
+
+import VehicleDetailPage from '../features/marketplace/pages/VehicleDetailPage';
+import MessagesPage from '../features/messaging/pages/MessagesPage';
 
 // Routes definition
 export const routes: RouteObject[] = [
   {
-    path: '/',
-    element: <AppShell />,
-    children: [
-      {
-        index: true,
-        element: <Landing />,
-      },
-      {
-        path: 'marketplace',
-        element: <MarketplaceHome />,
-      },
-      {
-        path: 'admin',
-        element: <AdminDashboardOverview />,
-      },
-      {
-        path: 'admin/agents',
-        element: <AdminAgentManagement />,
-      },
-      {
-        path: 'admin/listings',
-        element: <AdminListingModeration />,
-      },
-      {
-        path: 'admin/subscriptions',
-        element: <AdminSubscriptionOversight />,
-      },
-      {
-        path: 'admin/disputes',
-        element: <AdminDisputesReports />,
-      },
-      {
-        path: 'admin/audit-logs',
-        element: <AdminAuditLogs />,
-      },
-      {
-        path: 'admin/settings',
-        element: <AdminSystemSettings />,
-      },
-      {
-        path: 'admin/agents/new',
-        element: <AdminCreateAgentPage />,
-      },
-      {
-        path: 'login',
-        element: <LoginPage />,
-      },
-      {
-        path: 'signup',
-        element: <SignUpPage />,
-      },
-      {
-        path: 'agent/activate',
-        element: <AgentActivationPage />,
-      },
-    ],
+  path: '/',
+  element: <AppShell />,
+  children: [
+  {
+  index: true,
+  element: <Landing />,
+  },
+  {
+  path: 'marketplace',
+  element: <MarketplaceHome />,
+  },
+  {
+  path: 'vehicle/:id',
+  element: <VehicleDetailPage />,
+  },
+  {
+  path: 'profile',
+  element: <UserProfilePage />,
+  },
+  {
+  path: 'bookings',
+  element: <BookingsPage />,
+  },
+  {
+  path: 'messages',
+  element: <MessagesPage />,
+  },
+  {
+  path: 'admin',
+  element: <AdminDashboardOverview />,
+  },
+  {
+  path: 'admin/agents',
+  element: <AdminAgentManagement />,
+  },
+  {
+  path: 'admin/listings',
+  element: <AdminListingModeration />,
+  },
+  {
+  path: 'admin/subscriptions',
+  element: <AdminSubscriptionOversight />,
+  },
+  {
+  path: 'admin/disputes',
+  element: <AdminDisputesReports />,
+  },
+  {
+  path: 'admin/audit-logs',
+  element: <AdminAuditLogs />,
+  },
+  {
+  path: 'admin/settings',
+  element: <AdminSystemSettings />,
+  },
+  {
+  path: 'admin/agents/new',
+  element: <AdminCreateAgentPage />,
+  },
+  {
+  path: 'login',
+  element: <LoginPage />,
+  },
+  {
+  path: 'signup',
+  element: <SignUpPage />,
+  },
+  {
+  path: 'agent/activate',
+  element: <AgentActivationPage />,
+  },
+  ],
   },
   // Agent Routes (Protected)
   {
-    path: '/agent',
-    element: (
-      <AgentGuard>
-        <AgentLayout />
-      </AgentGuard>
-    ),
-    children: [
-      {
-        index: true,
-        element: <Navigate to="dashboard" replace />,
-      },
-      {
-        path: 'dashboard',
-        element: <AgentDashboard />,
-      },
-      {
-        path: 'fleet',
-        element: <FleetManagement />,
-      },
-      {
-        path: 'listings/new',
-        element: <ListingForm />,
-      },
-      {
-        path: 'listings/:id/edit',
-        element: <ListingForm />,
-      },
-      {
-        path: 'bookings',
-        element: <BookingsPage />,
-      },
-      {
-        path: 'leads',
-        element: <LeadsPage />,
-      },
-      {
-        path: 'subscription',
-        element: <SubscriptionPage />,
-      },
-      {
-        path: 'analytics',
-        element: <AnalyticsPage />,
-      },
-      {
-        path: 'profile',
-        element: <AgentProfilePage />,
-      },
-    ],
+  path: '/agent',
+  element: (
+  <AgentGuard>
+  <AgentLayout />
+  </AgentGuard>
+  ),
+  children: [
+  {
+  index: true,
+  element: <Navigate to="dashboard" replace />,
+  },
+  {
+  path: 'dashboard',
+  element: <AgentDashboard />,
+  },
+  {
+  path: 'fleet',
+  element: <FleetManagement />,
+  },
+  {
+  path: 'listings/new',
+  element: <ListingForm />,
+  },
+  {
+  path: 'listings/:id/edit',
+  element: <ListingForm />,
+  },
+  {
+  path: 'bookings',
+  element: <BookingsPage />,
+  },
+  {
+  path: 'leads',
+  element: <LeadsPage />,
+  },
+  {
+  path: 'messages',
+  element: <MessagesPage />,
+  },
+  {
+  path: 'subscription',
+  element: <SubscriptionPage />,
+  },
+  {
+  path: 'analytics',
+  element: <AnalyticsPage />,
+  },
+  {
+  path: 'profile',
+  element: <AgentProfilePage />,
+  },
+  ],
   },
 ];

@@ -7,20 +7,16 @@ service cloud.firestore {
       return request.auth != null;
     }
     
-    function getUserData() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
-    }
-    
     function isAdmin() {
-      return isSignedIn() && getUserData().role == 'ADMIN';
+      return isSignedIn() && request.auth.token.role == 'ADMIN';
     }
     
     function isAgent() {
-      return isSignedIn() && getUserData().role == 'AGENT';
+      return isSignedIn() && request.auth.token.role == 'AGENT';
     }
     
     function isApproved() {
-      return getUserData().isApproved == true;
+      return request.auth.token.isApproved == true;
     }
 
     // Users collection
@@ -39,8 +35,12 @@ service cloud.firestore {
     // Listings collection
     match /listings/{listingId} {
       allow read: if true; // Everyone can browse
-      allow create: if isAgent() && isApproved() && request.resource.data.agentId == request.auth.uid;
-      allow update, delete: if isAdmin() || (isAgent() && resource.data.agentId == request.auth.uid);
+      allow create: if isAgent() && 
+                   (request.resource.data.status == 'draft' || isApproved()) && 
+                   request.resource.data.agentId == request.auth.uid;
+      allow update: if isAdmin() || (isAgent() && resource.data.agentId == request.auth.uid && 
+                   (request.resource.data.status == 'draft' || isApproved()));
+      allow delete: if isAdmin() || (isAgent() && resource.data.agentId == request.auth.uid);
     }
     
     // Bookings collection
@@ -61,6 +61,13 @@ service cloud.firestore {
     // Subscriptions
     match /subscriptions/{subId} {
       allow read: if isSignedIn() && (request.auth.uid == resource.data.agentId || isAdmin());
+      allow create: if isAgent() && request.auth.uid == request.resource.data.agentId;
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+    // Subscription Plans
+    match /subscriptionPlans/{planId} {
+      allow read: if isSignedIn();
       allow write: if isAdmin();
     }
   }
