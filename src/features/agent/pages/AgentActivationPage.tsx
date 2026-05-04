@@ -32,6 +32,7 @@ const AgentActivationPage: React.FC = () => {
   const [selectedPlanId, setSelectedPlanId] = useState<string>('');
   
   const [submitting, setSubmitting] = useState(false);
+  const [duration, setDuration] = useState<number>(3);
 
   useEffect(() => {
     const init = async () => {
@@ -327,31 +328,68 @@ const AgentActivationPage: React.FC = () => {
           {step === 'plan' && (
             <form onSubmit={handleFinalSubmit} className="space-y-6 animate-in fade-in slide-in-from-right-4">
               <h2 className="text-xl font-bold text-white mb-4">Step 3: Select Plan</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto pr-2 custom-scrollbar">
-                {plans.map(plan => (
-                  <div 
-                    key={plan.id}
-                    onClick={() => setSelectedPlanId(plan.id)}
-                    className={`p-4 rounded-2xl border-2 cursor-pointer transition-all ${
-                      selectedPlanId === plan.id 
-                        ? 'border-amber-500 bg-amber-500/10' 
-                        : 'border-slate-800 bg-slate-950 hover:border-slate-700'
+              <div className="flex bg-slate-950/50 p-1 rounded-xl mb-6">
+                {[3, 6, 12].map((d) => (
+                  <button
+                    key={d}
+                    type="button"
+                    onClick={() => setDuration(d)}
+                    className={`flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
+                      duration === d
+                        ? 'bg-amber-600 text-white shadow-lg'
+                        : 'text-slate-500 hover:text-slate-400'
                     }`}
                   >
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-bold text-white text-sm">{plan.name}</h3>
-                      <span className="text-[10px] uppercase font-black tracking-widest text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded-lg">
-                        {plan.category === 'EARTH_MOVING' ? 'Earth' : 'Cars'}
-                      </span>
-                    </div>
-                    <p className="text-2xl font-black text-white mb-1">
-                      {plan.price.toLocaleString()} <span className="text-xs text-slate-500 font-bold uppercase tracking-wider">ETB / {plan.durationMonths === 12 ? 'yr' : plan.durationMonths + ' mo'}</span>
-                    </p>
-                    <p className="text-xs text-slate-400">
-                      Up to {plan.maxVehicles === 9999 ? 'Unlimited' : plan.maxVehicles} machinery
-                    </p>
-                  </div>
+                    {d === 12 ? '1 Year' : `${d} Months`}
+                  </button>
                 ))}
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 max-h-80 overflow-y-auto pr-2 custom-scrollbar">
+                {[5, 15, 9999].map(max => {
+                  const tierPlans = plans.filter(p => p.maxVehicles === max);
+                  const plan = tierPlans.find(p => p.durationMonths === duration) || tierPlans[0];
+                  
+                  if (!plan) return null;
+
+                  return (
+                    <div 
+                      key={plan.id}
+                      onClick={() => setSelectedPlanId(plan.id)}
+                      className={`p-5 rounded-2xl border-2 cursor-pointer transition-all ${
+                        selectedPlanId === plan.id 
+                          ? 'border-amber-500 bg-amber-500/10 shadow-lg shadow-amber-500/5' 
+                          : 'border-slate-800 bg-slate-950/50 hover:border-slate-700'
+                      }`}
+                    >
+                      <div className="flex justify-between items-center mb-3">
+                        <div className="flex flex-col">
+                          <span className={`text-[9px] font-black uppercase tracking-[0.2em] mb-1 ${
+                            max === 9999 ? 'text-amber-500' : max === 15 ? 'text-indigo-400' : 'text-slate-400'
+                          }`}>
+                            {max === 9999 ? 'Enterprise' : max === 15 ? 'Professional' : 'Basic'}
+                          </span>
+                          <h3 className="font-black text-white text-lg">
+                            {max === 9999 ? 'Limitless' : `${max} Machineries`}
+                          </h3>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-2xl font-black text-white leading-none mb-1">
+                            {plan.price.toLocaleString()}
+                          </p>
+                          <p className="text-[10px] text-slate-500 font-black uppercase tracking-wider">
+                            ETB / {plan.durationMonths === 12 ? 'Year' : `${plan.durationMonths} Mo`}
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-2 text-[10px] text-slate-400 font-bold uppercase tracking-wide">
+                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                        {max === 9999 ? 'Unlimited Fleet Size' : `Up to ${max} vehicles allowed`}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
               <div className="flex gap-4">
                 <button

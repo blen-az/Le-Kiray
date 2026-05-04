@@ -38,7 +38,12 @@ const DEFAULT_PLANS: SubscriptionPlan[] = [
   // Contractors / Consumers
   { id: 'con-3m', name: 'Contractor (3 Months)', maxVehicles: 0, price: 6000, durationMonths: 3, category: 'CONSUMER' },
   { id: 'con-6m', name: 'Contractor (6 Months)', maxVehicles: 0, price: 11000, durationMonths: 6, category: 'CONSUMER' },
-  { id: 'con-1y', name: 'Contractor (1 Year)', maxVehicles: 0, price: 20000, durationMonths: 12, category: 'CONSUMER' }
+  { id: 'con-1y', name: 'Contractor (1 Year)', maxVehicles: 0, price: 20000, durationMonths: 12, category: 'CONSUMER' },
+
+  // Cars & Vans
+  { id: 'cv-5-3m', name: 'Cars Basic (3 Months)', maxVehicles: 5, price: 4000, durationMonths: 3, category: 'CARS_VANS' },
+  { id: 'cv-15-3m', name: 'Cars Pro (3 Months)', maxVehicles: 15, price: 7000, durationMonths: 3, category: 'CARS_VANS' },
+  { id: 'cv-unl-3m', name: 'Cars Enterprise (3 Months)', maxVehicles: 9999, price: 12000, durationMonths: 3, category: 'CARS_VANS' }
 ];
 
 /**

@@ -26,6 +26,8 @@ const SubscriptionPage: React.FC = () => {
  const usage = data?.usage || null;
  const plans = (data?.plans || []).filter(p => p.category !== 'CONSUMER');
 
+ const [duration, setDuration] = React.useState<number>(3);
+
  const selectPlanMutation = useMutation({
  mutationFn: (planId: string) => createSubscription(agentId, user?.name || 'Unknown Agent', user?.email || '', planId),
  onSuccess: () => {
@@ -128,67 +130,111 @@ const SubscriptionPage: React.FC = () => {
 
  {/* Available Plans */}
  <div>
- <h3 className="text-xl font-black text-slate-900 mb-6">
+ <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+ <h3 className="text-xl font-black text-slate-900">
  {usage?.subscription ? 'Upgrade Your Plan' : 'Choose a Plan'}
  </h3>
- <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
- {plans.map(plan => {
+ 
+ <div className="flex bg-slate-100 p-1 rounded-xl w-full md:w-auto">
+ {[3, 6, 12].map((d) => (
+ <button
+ key={d}
+ onClick={() => setDuration(d)}
+ className={`flex-1 md:flex-none px-6 py-2 rounded-lg text-xs font-bold transition-all ${
+ duration === d
+ ? 'bg-white text-indigo-600 shadow-sm'
+ : 'text-slate-500 hover:text-slate-700'
+ }`}
+ >
+ {d === 12 ? '1 Year' : `${d} Months`}
+ </button>
+ ))}
+ </div>
+ </div>
+
+ <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+ {[5, 15, 9999].map(max => {
+ const tierPlans = plans.filter(p => p.maxVehicles === max);
+ const plan = tierPlans.find(p => p.durationMonths === duration) || tierPlans[0];
+ 
+ if (!plan) return null;
+
  const isCurrentPlan = usage?.subscription?.planId === plan.id;
- const isCarsVans = plan.category === 'CARS_VANS';
+ const isEnterprise = max === 9999;
+ const isPro = max === 15;
  
  return (
  <div 
  key={plan.id}
- className={`bg-white border rounded-2xl p-6 flex flex-col transition-all shadow-sm ${
+ className={`relative bg-white border-2 rounded-[32px] p-8 flex flex-col transition-all duration-300 ${
  isCurrentPlan
- ? 'border-indigo-500'
- : 'border-slate-200 hover:border-slate-300 '
+ ? 'border-indigo-500 shadow-xl shadow-indigo-500/10'
+ : 'border-slate-100 hover:border-slate-200 hover:shadow-lg '
  }`}
  >
- <span className={`px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest self-start mb-4 ${
- isCarsVans ? 'bg-indigo-500/10 text-indigo-600 ' : 'bg-amber-500/10 text-amber-600 '
+ {isPro && !isCurrentPlan && (
+ <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-lg">
+ Most Popular
+ </div>
+ )}
+
+ <div className="mb-6">
+ <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest inline-block mb-4 ${
+ isEnterprise ? 'bg-amber-500/10 text-amber-600' : 
+ isPro ? 'bg-indigo-500/10 text-indigo-600' : 
+ 'bg-slate-100 text-slate-600'
  }`}>
- {isCarsVans ? 'Cars & Vans' : 'Earth Moving'}
+ {isEnterprise ? 'Enterprise' : isPro ? 'Professional' : 'Basic'}
  </span>
- 
- <h4 className="text-lg font-black text-slate-900 mb-2">{plan.name}</h4>
- 
- <div className="flex items-end gap-1 mb-4">
- <span className="text-3xl font-black text-slate-900 ">{plan.price.toLocaleString()}</span>
- <span className="text-slate-500 text-sm font-bold mb-1">ETB / {plan.durationMonths === 12 ? 'yr' : plan.durationMonths + ' mo'}</span>
+ <h4 className="text-2xl font-black text-slate-900">{isEnterprise ? 'Limitless' : `${max} Machineries`}</h4>
  </div>
 
- <ul className="space-y-2 mb-6 flex-1">
- <li className="flex items-center gap-2 text-sm text-slate-500 ">
- <svg className="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
- <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+ <div className="flex items-baseline gap-1 mb-8">
+ <span className="text-4xl font-black text-slate-900 ">{plan.price.toLocaleString()}</span>
+ <span className="text-slate-500 text-sm font-bold">ETB / {plan.durationMonths === 12 ? 'year' : plan.durationMonths + ' mo'}</span>
+ </div>
+
+ <ul className="space-y-4 mb-10 flex-1">
+ <li className="flex items-center gap-3 text-sm text-slate-600 font-medium">
+ <div className="w-5 h-5 rounded-full bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
+ <svg className="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
  </svg>
- Up to {plan.maxVehicles === 9999 ? 'Unlimited' : plan.maxVehicles} vehicles
+ </div>
+ {isEnterprise ? 'Unlimited fleet size' : `Up to ${max} vehicles`}
  </li>
- <li className="flex items-center gap-2 text-sm text-slate-500 ">
- <svg className="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
- <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+ <li className="flex items-center gap-3 text-sm text-slate-600 font-medium">
+ <div className="w-5 h-5 rounded-full bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
+ <svg className="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
  </svg>
- {isCarsVans ? 'Instant Bookings' : 'Quote Requests'}
+ </div>
+ Quote Request System
  </li>
- <li className="flex items-center gap-2 text-sm text-slate-500 ">
- <svg className="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
- <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+ <li className="flex items-center gap-3 text-sm text-slate-600 font-medium">
+ <div className="w-5 h-5 rounded-full bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
+ <svg className="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
  </svg>
- Analytics Dashboard
+ </div>
+ Advanced Analytics
  </li>
  </ul>
 
  {isCurrentPlan ? (
- <span className="w-full py-3 bg-indigo-600/20 text-indigo-600 rounded-xl text-sm font-bold text-center">
- Current Plan
- </span>
+ <div className="w-full py-4 bg-indigo-50 text-indigo-600 rounded-2xl text-sm font-black text-center border border-indigo-100">
+ ACTIVE PLAN
+ </div>
  ) : (
  <button
  onClick={() => handleSelectPlan(plan.id)}
- className="w-full py-3 bg-slate-100 hover:bg-indigo-600 hover:text-white text-slate-700 rounded-xl text-sm font-bold transition-colors"
+ className={`w-full py-4 rounded-2xl text-sm font-black transition-all ${
+ isPro 
+ ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-600/20' 
+ : 'bg-slate-900 text-white hover:bg-slate-800 shadow-lg shadow-slate-900/10'
+ }`}
  >
- {usage?.subscription ? 'Upgrade' : 'Select Plan'}
+ {usage?.subscription ? 'Upgrade Now' : 'Get Started'}
  </button>
  )}
  </div>
