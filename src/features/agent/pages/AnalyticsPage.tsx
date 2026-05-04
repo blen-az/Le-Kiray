@@ -21,18 +21,8 @@ const AnalyticsPage: React.FC = () => {
  maxListings: 0,
  bookingsByCategory: [] as { name: string; count: number }[],
  leadsByStatus: [] as { name: string; count: number }[],
+ chartData: [] as { name: string; bookings: number; leads: number; revenue: number }[],
  });
-
- // Mock weekly data for charts (would come from real analytics in production)
- const weeklyData = [
- { name: 'Mon', bookings: 2, leads: 1, revenue: 4500 },
- { name: 'Tue', bookings: 3, leads: 2, revenue: 9000 },
- { name: 'Wed', bookings: 1, leads: 3, revenue: 3500 },
- { name: 'Thu', bookings: 4, leads: 1, revenue: 12000 },
- { name: 'Fri', bookings: 2, leads: 4, revenue: 8000 },
- { name: 'Sat', bookings: 5, leads: 2, revenue: 15000 },
- { name: 'Sun', bookings: 3, leads: 1, revenue: 9500 },
- ];
 
  useEffect(() => {
  loadAnalytics();
@@ -64,6 +54,27 @@ const AnalyticsPage: React.FC = () => {
  statusCount[lead.status] = (statusCount[lead.status] || 0) + 1;
  }
 
+ // Calculate chart data for the last 7 days
+ const chartData = [];
+ const today = new Date();
+ for (let i = 6; i >= 0; i--) {
+   const d = new Date(today);
+   d.setDate(d.getDate() - i);
+   const dateStr = d.toISOString().split('T')[0];
+   
+   const dayBookings = bookings.filter(b => b.createdAt && b.createdAt.startsWith(dateStr));
+   const dayLeads = leads.filter(l => l.createdAt && l.createdAt.startsWith(dateStr));
+   const dayRevenue = dayBookings.reduce((sum, b) => sum + (b.totalPrice || 0), 0);
+   
+   const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+   chartData.push({
+     name: days[d.getDay()],
+     bookings: dayBookings.length,
+     leads: dayLeads.length,
+     revenue: dayRevenue
+   });
+ }
+
  setStats({
  totalBookings: bookings.length,
  totalLeads: leads.length,
@@ -72,6 +83,7 @@ const AnalyticsPage: React.FC = () => {
  maxListings: usage.subscription?.maxVehicles || 0,
  bookingsByCategory: Object.entries(categoryCount).map(([name, count]) => ({ name, count })),
  leadsByStatus: Object.entries(statusCount).map(([name, count]) => ({ name, count })),
+ chartData,
  });
  } catch (error) {
  console.error('Error loading analytics:', error);
@@ -135,7 +147,7 @@ const AnalyticsPage: React.FC = () => {
  </div>
  <div className="h-72">
  <ResponsiveContainer width="100%" height="100%">
- <AreaChart data={weeklyData}>
+ <AreaChart data={stats.chartData}>
  <defs>
  <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
  <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
@@ -172,7 +184,7 @@ const AnalyticsPage: React.FC = () => {
  </div>
  <div className="h-72">
  <ResponsiveContainer width="100%" height="100%">
- <BarChart data={weeklyData}>
+ <BarChart data={stats.chartData}>
  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1e293b" />
  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b', fontWeight: 700 }} />
  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b', fontWeight: 700 }} />

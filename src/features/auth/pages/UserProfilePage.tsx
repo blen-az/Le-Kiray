@@ -16,8 +16,12 @@ const UserProfilePage: React.FC = () => {
 
  <div className="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm">
  <div className="flex items-center gap-6 mb-10 pb-10 border-b border-slate-100 ">
- <div className="w-24 h-24 rounded-3xl overflow-hidden border-4 border-slate-100 bg-slate-50 ">
- <img src={user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`} alt="Avatar" className="w-full h-full object-cover" />
+ <div className="w-24 h-24 rounded-3xl overflow-hidden border-4 border-slate-100 bg-slate-50 flex items-center justify-center text-4xl font-black text-slate-400">
+ {user.avatar ? (
+  <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover" />
+) : (
+  <span>{user.name?.charAt(0).toUpperCase()}</span>
+)}
  </div>
  <div>
  <h2 className="text-2xl font-bold text-slate-900 ">{user.name}</h2>

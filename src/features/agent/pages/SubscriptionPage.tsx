@@ -24,7 +24,7 @@ const SubscriptionPage: React.FC = () => {
  });
 
  const usage = data?.usage || null;
- const plans = data?.plans || [];
+ const plans = (data?.plans || []).filter(p => p.category !== 'CONSUMER');
 
  const selectPlanMutation = useMutation({
  mutationFn: (planId: string) => createSubscription(agentId, user?.name || 'Unknown Agent', user?.email || '', planId),
@@ -154,8 +154,8 @@ const SubscriptionPage: React.FC = () => {
  <h4 className="text-lg font-black text-slate-900 mb-2">{plan.name}</h4>
  
  <div className="flex items-end gap-1 mb-4">
- <span className="text-3xl font-black text-slate-900 ">{plan.monthlyFee.toLocaleString()}</span>
- <span className="text-slate-500 text-sm font-bold mb-1">ETB/mo</span>
+ <span className="text-3xl font-black text-slate-900 ">{plan.price.toLocaleString()}</span>
+ <span className="text-slate-500 text-sm font-bold mb-1">ETB / {plan.durationMonths === 12 ? 'yr' : plan.durationMonths + ' mo'}</span>
  </div>
 
  <ul className="space-y-2 mb-6 flex-1">
@@ -163,7 +163,7 @@ const SubscriptionPage: React.FC = () => {
  <svg className="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
  </svg>
- Up to {plan.maxVehicles} vehicles
+ Up to {plan.maxVehicles === 9999 ? 'Unlimited' : plan.maxVehicles} vehicles
  </li>
  <li className="flex items-center gap-2 text-sm text-slate-500 ">
  <svg className="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -114,12 +114,12 @@ const AgentLayout: React.FC = () => {
  {/* User Info */}
  <div className="p-4 border-t border-slate-200 ">
  <div className="flex items-center gap-3 p-3 bg-white border border-slate-100 rounded-xl mb-3">
- <div className="w-10 h-10 rounded-xl overflow-hidden bg-slate-800">
- <img 
- src={user.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=Agent'} 
- alt="Avatar" 
- className="w-full h-full object-cover"
- />
+ <div className="w-10 h-10 rounded-xl overflow-hidden bg-slate-800 flex items-center justify-center font-black text-slate-400 text-lg">
+ {user.avatar ? (
+  <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover" />
+) : (
+  <span>{user.name?.charAt(0).toUpperCase()}</span>
+)}
  </div>
  <div className="flex-1 min-w-0">
  <p className="text-sm font-bold text-slate-900 truncate">{user.name}</p>

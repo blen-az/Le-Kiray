@@ -170,8 +170,9 @@ export interface SubscriptionPlan {
  id: string;
  name: string;
  maxVehicles: number;
- monthlyFee: number;
- category: 'CARS_VANS' | 'EARTH_MOVING';
+ price: number;
+ durationMonths: number;
+ category: 'CARS_VANS' | 'EARTH_MOVING' | 'CONSUMER';
 }
 
 export interface Subscription {
