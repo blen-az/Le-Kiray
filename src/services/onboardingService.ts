@@ -1,5 +1,6 @@
 import { doc, setDoc, getDoc, updateDoc, query, collection, where, getDocs, Timestamp, orderBy, limit } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import { createTrialSubscription } from './subscriptionService';
 import { AgentStatus, InviteStatus, AgentInvite, AuditLog } from '../types';
 
 const USERS_COLLECTION = 'users';
@@ -171,16 +172,23 @@ export const completeAgentOnboarding = async (
  */
 export const approveAgentAccount = async (agentId: string, adminId: string): Promise<void> => {
  try {
- await updateDoc(doc(db, USERS_COLLECTION, agentId), {
- isApproved: true,
- isSuspended: false,
- updatedAt: new Date().toISOString(),
- });
+  const userDoc = await getDoc(doc(db, USERS_COLLECTION, agentId));
+  const userData = userDoc.data();
 
- await logAudit(adminId, agentId, 'APPROVE_AGENT', 'Admin approved agent account for publishing');
+  await updateDoc(doc(db, USERS_COLLECTION, agentId), {
+   isApproved: true,
+   isSuspended: false,
+   updatedAt: new Date().toISOString(),
+  });
+
+  if (userData) {
+   await createTrialSubscription(agentId, userData.name, userData.email);
+  }
+
+  await logAudit(adminId, agentId, 'APPROVE_AGENT', 'Admin approved agent account and granted free trial');
  } catch (error) {
- console.error('Error approving agent account:', error);
- throw error;
+  console.error('Error approving agent account:', error);
+  throw error;
  }
 };
 

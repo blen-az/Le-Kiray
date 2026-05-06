@@ -43,7 +43,8 @@ const DEFAULT_PLANS: SubscriptionPlan[] = [
   // Cars & Vans
   { id: 'cv-5-3m', name: 'Cars Basic (3 Months)', maxVehicles: 5, price: 4000, durationMonths: 3, category: 'CARS_VANS' },
   { id: 'cv-15-3m', name: 'Cars Pro (3 Months)', maxVehicles: 15, price: 7000, durationMonths: 3, category: 'CARS_VANS' },
-  { id: 'cv-unl-3m', name: 'Cars Enterprise (3 Months)', maxVehicles: 9999, price: 12000, durationMonths: 3, category: 'CARS_VANS' }
+  { id: 'cv-unl-3m', name: 'Cars Enterprise (3 Months)', maxVehicles: 9999, price: 12000, durationMonths: 3, category: 'CARS_VANS' },
+  { id: 'free-trial', name: 'Free Trial (1 Month)', maxVehicles: 5, price: 0, durationMonths: 1, category: 'EARTH_MOVING' }
 ];
 
 /**
@@ -143,6 +144,47 @@ export const createSubscription = async (
  return { id: docRef.id, ...subscriptionData };
  } catch (error) {
  console.error('Error creating subscription:', error);
+ throw error;
+ }
+};
+
+/**
+ * Automatically create a 1-month free trial for a new agent
+ */
+export const createTrialSubscription = async (
+ agentId: string,
+ agentName: string,
+ agentEmail: string
+): Promise<Subscription> => {
+ try {
+ // Check if they already have one to avoid duplicates
+ const existing = await getSubscription(agentId);
+ if (existing) return existing;
+
+ const docRef = doc(collection(db, SUBSCRIPTIONS_COLLECTION));
+ const now = new Date();
+ const periodEnd = new Date(now);
+ periodEnd.setMonth(periodEnd.getMonth() + 1); // 1 month trial
+
+ const trialData: Omit<Subscription, 'id'> = {
+ agentId,
+ agentName,
+ agentEmail,
+ planId: 'free-trial',
+ planName: 'Free Trial (1 Month)',
+ status: 'trial',
+ maxVehicles: 5, // Default trial limit
+ activeListingCount: 0,
+ currentPeriodStart: now.toISOString(),
+ currentPeriodEnd: periodEnd.toISOString(),
+ createdAt: now.toISOString(),
+ updatedAt: now.toISOString(),
+ };
+
+ await setDoc(docRef, trialData);
+ return { id: docRef.id, ...trialData };
+ } catch (error) {
+ console.error('Error creating trial subscription:', error);
  throw error;
  }
 };
