@@ -46,8 +46,8 @@ const AdminLeadsOversight: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-black text-white tracking-tight">Quote Requests</h1>
-          <p className="text-slate-500 mt-1">Platform-wide lead activity overview</p>
+          <h1 className="text-3xl font-black text-white tracking-tight">Booking Requests</h1>
+          <p className="text-slate-500 mt-1">Platform-wide booking activity overview</p>
         </div>
         {counts.new > 0 && (
           <div className="flex items-center gap-2 px-4 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-xl">
@@ -148,7 +148,16 @@ const AdminLeadsOversight: React.FC = () => {
                       <p className="text-slate-300 text-sm line-clamp-2 max-w-[200px]">{lead.scopeOfWork || '—'}</p>
                     </td>
                     <td className="px-6 py-4 text-slate-400 text-sm">
-                      {lead.requestedStartDate ? `From ${lead.requestedStartDate} · ${lead.duration}` : lead.duration || '—'}
+                      {lead.requestedStartDate ? (
+                        <>
+                          <div className="font-bold text-slate-200">
+                            {lead.requestedStartDate} {lead.requestedEndDate ? `— ${lead.requestedEndDate}` : ''}
+                          </div>
+                          <div className="text-[10px] uppercase tracking-widest opacity-60">{lead.duration}</div>
+                        </>
+                      ) : (
+                        lead.duration || '—'
+                      )}
                     </td>
                     <td className="px-6 py-4">
                       <span className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border ${STATUS_COLORS[lead.status] || 'bg-slate-700 text-slate-300 border-slate-600'}`}>

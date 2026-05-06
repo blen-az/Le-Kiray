@@ -83,7 +83,7 @@ const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle, onSelect }) => {
   : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-900/20'
   }`}
   >
-  {isHeavy ? 'Get Quote' : 'Book Now'}
+  Book Now
   </button>
   </div>
   </div>

@@ -68,10 +68,10 @@ const LeadsPage: React.FC = () => {
  <div className="p-8">
  {/* Header */}
  <div className="mb-8">
- <h1 className="text-2xl font-black text-slate-900 tracking-tight">
- Leads <span className="text-amber-500">(Quote Requests)</span>
- </h1>
- <p className="text-slate-500 mt-1">Manage quote requests for earth-moving equipment</p>
+  <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+    Booking Requests <span className="text-amber-500">(Leads)</span>
+  </h1>
+  <p className="text-slate-500 mt-1">Manage project-based booking requests for your equipment</p>
  </div>
 
  {/* Disclaimer */}
@@ -163,8 +163,8 @@ const LeadsPage: React.FC = () => {
  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
  </svg>
  </div>
- <h3 className="text-xl font-black text-slate-900 mb-2">No leads yet</h3>
- <p className="text-slate-500 ">Quote requests will appear here when customers inquire about your equipment.</p>
+  <h3 className="text-xl font-black text-slate-900 mb-2">No bookings yet</h3>
+  <p className="text-slate-500 ">Booking requests will appear here when customers inquire about your equipment.</p>
  </div>
  )}
  </div>
@@ -202,8 +202,10 @@ const LeadsPage: React.FC = () => {
  </div>
  {selectedLead.requestedStartDate && (
  <div>
- <p className="text-xs text-slate-500 uppercase tracking-widest mb-1">Requested Start</p>
- <p className="text-slate-900 font-medium">{selectedLead.requestedStartDate}</p>
+ <p className="text-xs text-slate-500 uppercase tracking-widest mb-1">Project Timeline</p>
+ <p className="text-slate-900 font-bold">
+   {selectedLead.requestedStartDate} {selectedLead.requestedEndDate ? `— ${selectedLead.requestedEndDate}` : ''}
+ </p>
  </div>
  )}
  </div>

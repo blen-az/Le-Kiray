@@ -185,6 +185,38 @@ export const approveAgentAccount = async (agentId: string, adminId: string): Pro
 };
 
 /**
+ * Manually activate and approve agent (Admin only)
+ * Bypasses the invite link process if necessary.
+ */
+export const manuallyActivateAgent = async (agentId: string, adminId: string): Promise<void> => {
+  try {
+    await updateDoc(doc(db, USERS_COLLECTION, agentId), {
+      isApproved: true,
+      status: AgentStatus.APPROVED,
+      isSuspended: false,
+      updatedAt: new Date().toISOString(),
+    });
+
+    // If there's an active invite, mark it as used
+    const q = query(collection(db, INVITES_COLLECTION), where('agentId', '==', agentId), where('status', '==', InviteStatus.SENT));
+    const querySnapshot = await getDocs(q);
+    
+    if (!querySnapshot.empty) {
+      await updateDoc(doc(db, INVITES_COLLECTION, querySnapshot.docs[0].id), {
+        status: InviteStatus.USED,
+        usedAt: new Date().toISOString(),
+      });
+    }
+
+    await logAudit(adminId, agentId, 'APPROVE_AGENT', 'Admin manually activated and approved agent account');
+  } catch (error) {
+    console.error('Error manually activating agent:', error);
+    throw error;
+  }
+};
+
+
+/**
  * Suspend agent account (Admin only)
  */
 export const suspendAgentAccount = async (agentId: string, adminId: string, reason?: string): Promise<void> => {
@@ -292,27 +324,25 @@ export const logAudit = async (
  * Get all agents with pending invites
  */
 export const getPendingAgents = async (): Promise<any[]> => {
- try {
- const q = query(collection(db, USERS_COLLECTION), where('role', '==', 'AGENT'));
- const querySnapshot = await getDocs(q);
+  try {
+    const q = query(collection(db, USERS_COLLECTION), where('role', '==', 'AGENT'));
+    const querySnapshot = await getDocs(q);
 
- const agents = await Promise.all(
- querySnapshot.docs.map(async (doc) => {
- const agentData = doc.data();
- const invite = await getAgentInvite(doc.id);
- return {
- ...agentData,
- id: doc.id,
- isApproved: agentData.isApproved || false,
- inviteToken: invite?.token,
- inviteStatus: invite?.status,
- };
- })
- );
+    const agents = querySnapshot.docs.map((doc) => {
+      const agentData = doc.data();
+      return {
+        ...agentData,
+        id: doc.id,
+        isApproved: agentData.isApproved || false,
+      };
+    });
 
- return agents;
- } catch (error) {
- console.error('Error getting pending agents:', error);
- throw error;
- }
+    return agents;
+  } catch (error: any) {
+    console.error('Error getting pending agents:', error);
+    if (error?.code === 'unavailable' || error?.message?.includes('offline')) {
+      return [];
+    }
+    throw error;
+  }
 };

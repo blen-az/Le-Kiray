@@ -145,6 +145,7 @@ export interface QuoteRequest {
  duration: string;
  scopeOfWork: string;
  requestedStartDate?: string;
+ requestedEndDate?: string;
  status: LeadStatus;
  createdAt: string;
  updatedAt: string;

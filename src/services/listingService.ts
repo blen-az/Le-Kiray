@@ -215,10 +215,13 @@ export const getAllAdminListings = async (): Promise<Listing[]> => {
  const snapshot = await getDocs(q);
  const listings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Listing));
  return listings.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
- } catch (error) {
- console.error('Error fetching all admin listings:', error);
- throw error;
- }
+  } catch (error: any) {
+    console.error('Error fetching all admin listings:', error);
+    if (error?.code === 'unavailable' || error?.message?.includes('offline')) {
+      return [];
+    }
+    throw error;
+  }
 };
 
 /**

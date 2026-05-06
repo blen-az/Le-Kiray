@@ -45,7 +45,9 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ vehicle, onBack }) => {
           consumerEmail: currentUser!.email || '',
           consumerPhone: 'Not Provided',
           projectLocation: projectDetails.location,
-          duration: projectDetails.duration,
+          duration: `${dateRange.days} days`,
+          requestedStartDate: dateRange.start,
+          requestedEndDate: dateRange.end,
           scopeOfWork: projectDetails.scope,
           status: 'new'
         });
@@ -95,11 +97,11 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ vehicle, onBack }) => {
           </svg>
         </div>
         <h2 className="text-4xl font-black text-slate-900 mb-6 tracking-tight">
-          Request Transmitted!
+          Booking Request Sent!
         </h2>
         <p className="text-slate-500 text-lg mb-12 max-w-lg mx-auto font-medium">
-          Your request for the {vehicle.make} {vehicle.model} has been sent to {vehicle.agentName}. 
-          Start a chat now to coordinate logistics and finalize the rental.
+          Your booking request for the {vehicle.make} {vehicle.model} has been transmitted to {vehicle.agentName}. 
+          Start a chat now to finalize logistics and confirm availability.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <button 
@@ -213,8 +215,8 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ vehicle, onBack }) => {
               isHeavy ? (
                 <form onSubmit={handleProceedToBooking} className="space-y-10">
                   <div className="mb-4">
-                    <h2 className="text-3xl font-black text-slate-900 tracking-tight">Request Quote</h2>
-                    <p className="text-slate-500 text-sm font-bold mt-2 uppercase tracking-widest opacity-70">Custom Logistics Required</p>
+                    <h2 className="text-3xl font-black text-slate-900 tracking-tight">Reserve Equipment</h2>
+                    <p className="text-slate-500 text-sm font-bold mt-2 uppercase tracking-widest opacity-70">Booking details required</p>
                   </div>
 
                   {error && (
@@ -235,14 +237,14 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ vehicle, onBack }) => {
                       />
                     </div>
 
-                    <div>
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Duration Estimate</label>
-                      <input 
-                        required
-                        type="text" 
-                        placeholder="e.g., 45 Working Days"
-                        className="w-full px-8 py-5 bg-slate-50 border border-slate-100 rounded-3xl text-slate-900 outline-none focus:ring-2 focus:ring-amber-500 transition-all font-bold placeholder:opacity-30"
-                        onChange={e => setProjectDetails({...projectDetails, duration: e.target.value})}
+                    <div className="bg-slate-50 rounded-[32px] p-6 border border-slate-100 ">
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-6 text-center opacity-70">Project Timeline</label>
+                      <BookingCalendar
+                        listingId={vehicle.id}
+                        accentColor="amber"
+                        onDateChange={(start, end, days) =>
+                          setDateRange({ start, end, days })
+                        }
                       />
                     </div>
 
@@ -271,11 +273,11 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ vehicle, onBack }) => {
 
                   <button 
                     type="submit" 
-                    disabled={loading}
+                    disabled={loading || (isHeavy && !dateRange.days)}
                     className="w-full py-6 bg-amber-600 hover:bg-amber-500 text-white font-black uppercase tracking-[0.3em] text-xs rounded-3xl transition-all shadow-2xl shadow-amber-900/30 hover:-translate-y-1 active:scale-95 disabled:opacity-50 flex justify-center items-center gap-4"
                   >
                     {loading && <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />}
-                    {loading ? 'Transmitting Request...' : 'Transmit Quote Request'}
+                    {loading ? 'Transmitting Request...' : 'Request Booking'}
                   </button>
                 </form>
               ) : (

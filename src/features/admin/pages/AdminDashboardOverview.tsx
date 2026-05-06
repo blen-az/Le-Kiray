@@ -13,7 +13,7 @@ const AdminDashboardOverview: React.FC = () => {
   const stats = {
     totalAgents: agents.length,
     approved: agents.filter((a: any) => a.isApproved && !a.isSuspended).length,
-    pendingApproval: agents.filter((a: any) => !a.isApproved && !a.isSuspended && a.inviteStatus === 'USED').length,
+    pendingApproval: agents.filter((a: any) => !a.isApproved && !a.isSuspended).length,
     suspended: agents.filter((a: any) => a.isSuspended).length,
     totalListings: listings.length,
     pendingListings: listings.filter((l: any) => l.status === 'pending_review').length,
@@ -70,7 +70,7 @@ const AdminDashboardOverview: React.FC = () => {
       link: '/admin/subscriptions',
     },
     {
-      title: 'Quote Requests',
+      title: 'Booking Requests',
       description: 'Monitor platform-wide lead activity',
       icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2',
       link: '/admin/leads',

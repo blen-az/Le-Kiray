@@ -66,6 +66,18 @@ const SubscriptionPage: React.FC = () => {
  <p className="text-slate-500 mt-1">Manage your plan and fleet limits</p>
  </div>
 
+  {!user.isApproved && (
+  <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-8 mb-10 text-center">
+  <div className="w-16 h-16 bg-amber-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+  <svg className="w-8 h-8 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+  </svg>
+  </div>
+  <h2 className="text-xl font-black text-slate-900 mb-2">Account Pending Approval</h2>
+  <p className="text-slate-500 ">Your agent account must be approved by the administrator before you can subscribe to a plan.</p>
+  </div>
+  )}
+
  {/* Current Plan */}
  {usage?.subscription ? (
  <div className="bg-white border border-slate-200 rounded-3xl p-8 mb-10 relative overflow-hidden shadow-sm">
@@ -230,16 +242,19 @@ const SubscriptionPage: React.FC = () => {
     {usage?.subscription?.status === 'pending' ? '⌛ PENDING APPROVAL' : '✓ ACTIVE PLAN'}
   </div>
   ) : (
- <button
- onClick={() => handleSelectPlan(plan.id)}
- className={`w-full py-4 rounded-2xl text-sm font-black transition-all ${
- isPro 
- ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-600/20' 
- : 'bg-slate-900 text-white hover:bg-slate-800 shadow-lg shadow-slate-900/10'
- }`}
- >
- {usage?.subscription ? 'Upgrade Now' : 'Get Started'}
- </button>
+  <button
+  onClick={() => handleSelectPlan(plan.id)}
+  disabled={!user.isApproved}
+  className={`w-full py-4 rounded-2xl text-sm font-black transition-all ${
+  !user.isApproved 
+  ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
+  : isPro 
+  ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-600/20' 
+  : 'bg-slate-900 text-white hover:bg-slate-800 shadow-lg shadow-slate-900/10'
+  }`}
+  >
+  {!user.isApproved ? 'AWAITING APPROVAL' : usage?.subscription ? 'Upgrade Now' : 'Get Started'}
+  </button>
  )}
  </div>
  );

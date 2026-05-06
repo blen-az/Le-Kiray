@@ -74,7 +74,7 @@ const AgentDashboard: React.FC = () => {
  </div>
  )}
 
- {!data?.stats.maxListings && (
+ {user.isApproved && !data?.stats.maxListings && (
  <div className="bg-indigo-600/10 border border-indigo-600/20 rounded-2xl p-6 flex items-start justify-between gap-4">
  <div className="flex items-start gap-4">
  <div className="w-10 h-10 bg-indigo-600/20 rounded-xl flex items-center justify-center flex-shrink-0">

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getPendingAgents, resendAgentInvite, createAgentWithInvite, approveAgentAccount, suspendAgentAccount } from '../../../services/onboardingService';
+import { getPendingAgents, resendAgentInvite, createAgentWithInvite, approveAgentAccount, suspendAgentAccount, manuallyActivateAgent } from '../../../services/onboardingService';
 
 interface Agent {
   id: string;
@@ -17,12 +17,8 @@ interface Agent {
 
 const AdminAgentManagement: React.FC = () => {
   const queryClient = useQueryClient();
-  const [showCreateForm, setShowCreateForm] = useState(false);
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
   const [filterTab, setFilterTab] = useState<'all' | 'pending' | 'approved' | 'suspended'>('all');
-  const [formData, setFormData] = useState({
-    name: '', email: '', companyName: '', phone: '', initialPlan: 'STANDARD',
-  });
 
   const { data: agents = [], isLoading } = useQuery({
     queryKey: ['admin-agents'],
@@ -46,41 +42,9 @@ const AdminAgentManagement: React.FC = () => {
     },
   });
 
-  const resendMutation = useMutation({
-    mutationFn: (agentId: string) => resendAgentInvite(agentId, 'admin'),
-    onSuccess: (token) => {
-      const link = `${window.location.origin}/agent/activate?token=${token}`;
-      navigator.clipboard.writeText(link);
-      alert('Invite link copied to clipboard!');
-      queryClient.invalidateQueries({ queryKey: ['admin-agents'] });
-    },
-  });
-
-  const createMutation = useMutation({
-    mutationFn: () => createAgentWithInvite('admin', {
-      fullName: formData.name,
-      email: formData.email,
-      companyName: formData.companyName,
-      phone: formData.phone,
-      initialPlan: formData.initialPlan,
-    }),
-    onSuccess: (result) => {
-      const link = result.inviteLink;
-      navigator.clipboard.writeText(link);
-      alert(`Agent created! Invite link copied:\n${link}`);
-      setFormData({ name: '', email: '', companyName: '', phone: '', initialPlan: 'STANDARD' });
-      setShowCreateForm(false);
-      queryClient.invalidateQueries({ queryKey: ['admin-agents'] });
-    },
-    onError: () => alert('Failed to create agent.'),
-  });
-
   const getStatusBadge = (agent: Agent) => {
-    if (agent.isSuspended) return <span className="px-2 py-1 bg-red-500/10 text-red-400 rounded-lg text-[9px] font-black uppercase tracking-widest border border-red-500/20">🚫 Suspended</span>;
     if (agent.isApproved) return <span className="px-2 py-1 bg-emerald-500/10 text-emerald-400 rounded-lg text-[9px] font-black uppercase tracking-widest border border-emerald-500/20">✓ Approved</span>;
-    if (agent.inviteStatus === 'USED') return <span className="px-2 py-1 bg-amber-500/10 text-amber-400 rounded-lg text-[9px] font-black uppercase tracking-widest border border-amber-500/20">⌛ Needs Approval</span>;
-    if (agent.inviteStatus === 'EXPIRED') return <span className="px-2 py-1 bg-red-500/10 text-red-400 rounded-lg text-[9px] font-black uppercase tracking-widest border border-red-500/20">✕ Expired</span>;
-    return <span className="px-2 py-1 bg-slate-700 text-slate-400 rounded-lg text-[9px] font-black uppercase tracking-widest">⏳ Pending Activation</span>;
+    return <span className="px-2 py-1 bg-amber-500/10 text-amber-400 rounded-lg text-[9px] font-black uppercase tracking-widest border border-amber-500/20">⌛ Pending Approval</span>;
   };
 
   const filtered = agents.filter((a: Agent) => {
@@ -103,14 +67,8 @@ const AdminAgentManagement: React.FC = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-black text-white tracking-tight">Agent Management</h1>
-          <p className="text-slate-500 mt-1">Create, approve, and manage platform agents</p>
+          <p className="text-slate-500 mt-1">Review and approve agent registrations</p>
         </div>
-        <button
-          onClick={() => setShowCreateForm(!showCreateForm)}
-          className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold transition-colors text-sm"
-        >
-          {showCreateForm ? '✕ Cancel' : '+ Create Agent'}
-        </button>
       </div>
 
       {/* Stats */}
@@ -128,45 +86,6 @@ const AdminAgentManagement: React.FC = () => {
         ))}
       </div>
 
-      {/* Create Form */}
-      {showCreateForm && (
-        <div className="bg-slate-900 border border-slate-700 rounded-2xl p-6 mb-8">
-          <h2 className="text-xl font-black text-white mb-6">Create New Agent</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {[
-              { placeholder: 'Full Name', key: 'name', type: 'text' },
-              { placeholder: 'Email', key: 'email', type: 'email' },
-              { placeholder: 'Company Name', key: 'companyName', type: 'text' },
-              { placeholder: 'Phone (optional)', key: 'phone', type: 'tel' },
-            ].map(({ placeholder, key, type }) => (
-              <input
-                key={key}
-                type={type}
-                placeholder={placeholder}
-                value={formData[key as keyof typeof formData]}
-                onChange={(e) => setFormData({ ...formData, [key]: e.target.value })}
-                className="px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none"
-              />
-            ))}
-            <select
-              value={formData.initialPlan}
-              onChange={(e) => setFormData({ ...formData, initialPlan: e.target.value })}
-              className="px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white focus:border-indigo-500 focus:outline-none"
-            >
-              <option value="STARTER">Basic (5 machineries)</option>
-              <option value="STANDARD">Pro (15 machineries)</option>
-              <option value="PROFESSIONAL">Enterprise (Unlimited)</option>
-            </select>
-          </div>
-          <button
-            onClick={() => createMutation.mutate()}
-            disabled={createMutation.isPending || !formData.name || !formData.email || !formData.companyName}
-            className="mt-4 w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold transition-colors disabled:opacity-50"
-          >
-            {createMutation.isPending ? 'Creating...' : 'Create & Copy Invite Link'}
-          </button>
-        </div>
-      )}
 
       {/* Filter Tabs */}
       <div className="flex gap-2 mb-6">
@@ -217,22 +136,13 @@ const AdminAgentManagement: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center justify-end gap-2">
-                        {agent.inviteStatus === 'USED' && !agent.isApproved && !agent.isSuspended && (
+                        {!agent.isApproved && !agent.isSuspended && (
                           <button
                             onClick={() => approveMutation.mutate(agent.id)}
                             disabled={approveMutation.isPending}
                             className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-black uppercase rounded-lg transition-colors"
                           >
                             Approve
-                          </button>
-                        )}
-                        {(agent.inviteStatus === 'SENT' || agent.inviteStatus === 'EXPIRED') && (
-                          <button
-                            onClick={() => resendMutation.mutate(agent.id)}
-                            disabled={resendMutation.isPending}
-                            className="text-indigo-400 hover:text-indigo-300 text-xs font-bold"
-                          >
-                            Resend Invite
                           </button>
                         )}
                         {agent.isApproved && !agent.isSuspended && (
@@ -286,8 +196,7 @@ const AdminAgentManagement: React.FC = () => {
                 { label: 'Email', value: selectedAgent.email },
                 { label: 'Phone', value: selectedAgent.phone || '—' },
                 { label: 'Joined', value: new Date(selectedAgent.createdAt).toLocaleDateString() },
-                { label: 'Invite Status', value: selectedAgent.inviteStatus || '—' },
-                { label: 'Account Status', value: selectedAgent.isSuspended ? 'Suspended' : selectedAgent.isApproved ? 'Approved' : 'Pending' },
+                { label: 'Account Status', value: selectedAgent.isSuspended ? 'Suspended' : selectedAgent.isApproved ? 'Approved' : 'Pending Approval' },
               ].map(({ label, value }) => (
                 <div key={label} className="flex justify-between items-center py-2 border-b border-slate-800">
                   <span className="text-slate-500 text-sm">{label}</span>
@@ -297,7 +206,7 @@ const AdminAgentManagement: React.FC = () => {
             </div>
 
             <div className="flex gap-3">
-              {!selectedAgent.isApproved && !selectedAgent.isSuspended && selectedAgent.inviteStatus === 'USED' && (
+              {!selectedAgent.isApproved && !selectedAgent.isSuspended && (
                 <button
                   onClick={() => approveMutation.mutate(selectedAgent.id)}
                   className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-sm transition-colors"
