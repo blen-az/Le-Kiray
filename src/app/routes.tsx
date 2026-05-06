@@ -12,6 +12,7 @@ import AdminSubscriptionOversight from '../features/admin/pages/AdminSubscriptio
 import AdminDisputesReports from '../features/admin/pages/AdminDisputesReports';
 import AdminAuditLogs from '../features/admin/pages/AdminAuditLogs';
 import AdminSystemSettings from '../features/admin/pages/AdminSystemSettings';
+import AdminLeadsOversight from '../features/admin/pages/AdminLeadsOversight';
 
 // Agent Pages
 import AgentGuard from '../features/agent/guards/AgentGuard';
@@ -89,6 +90,10 @@ export const routes: RouteObject[] = [
   {
   path: 'admin/settings',
   element: <AdminSystemSettings />,
+  },
+  {
+  path: 'admin/leads',
+  element: <AdminLeadsOversight />,
   },
   {
   path: 'admin/agents/new',

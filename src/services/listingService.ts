@@ -207,6 +207,54 @@ export const archiveListing = async (id: string): Promise<void> => {
 };
 
 /**
+ * Get ALL listings across all agents (Admin only)
+ */
+export const getAllAdminListings = async (): Promise<Listing[]> => {
+ try {
+ const q = query(collection(db, COLLECTION));
+ const snapshot = await getDocs(q);
+ const listings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Listing));
+ return listings.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+ } catch (error) {
+ console.error('Error fetching all admin listings:', error);
+ throw error;
+ }
+};
+
+/**
+ * Approve a listing for the marketplace (Admin only)
+ */
+export const approveListing = async (id: string, adminId: string): Promise<void> => {
+ try {
+ await updateDoc(doc(db, COLLECTION, id), {
+ status: 'active',
+ approvedBy: adminId,
+ approvedAt: new Date().toISOString(),
+ updatedAt: new Date().toISOString(),
+ });
+ } catch (error) {
+ console.error('Error approving listing:', error);
+ throw error;
+ }
+};
+
+/**
+ * Suspend/reject a listing (Admin only)
+ */
+export const suspendListing = async (id: string, reason?: string): Promise<void> => {
+ try {
+ await updateDoc(doc(db, COLLECTION, id), {
+ status: 'archived',
+ suspendReason: reason || 'Suspended by admin',
+ updatedAt: new Date().toISOString(),
+ });
+ } catch (error) {
+ console.error('Error suspending listing:', error);
+ throw error;
+ }
+};
+
+/**
  * Count active listings for an agent (for subscription limits)
  */
 export const countActiveListings = async (agentId: string): Promise<number> => {

@@ -1,290 +1,334 @@
-import React, { useState, useEffect } from 'react';
-import { getPendingAgents, resendAgentInvite, createAgentWithInvite, approveAgentAccount } from '../../../services/onboardingService';
+import React, { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { getPendingAgents, resendAgentInvite, createAgentWithInvite, approveAgentAccount, suspendAgentAccount } from '../../../services/onboardingService';
 
 interface Agent {
- id: string;
- name: string;
- email: string;
- companyName: string;
- phone?: string;
- status: string;
- inviteStatus?: string;
- inviteToken?: string;
- isApproved?: boolean;
- createdAt: string;
-}
-
-interface FormData {
- name: string;
- email: string;
- companyName: string;
- phone: string;
- initialPlan: string;
+  id: string;
+  name: string;
+  email: string;
+  companyName: string;
+  phone?: string;
+  status: string;
+  inviteStatus?: string;
+  isApproved?: boolean;
+  isSuspended?: boolean;
+  createdAt: string;
 }
 
 const AdminAgentManagement: React.FC = () => {
- const [agents, setAgents] = useState<Agent[]>([]);
- const [loading, setLoading] = useState(true);
- const [showCreateForm, setShowCreateForm] = useState(false);
- const [formData, setFormData] = useState<FormData>({
- name: '',
- email: '',
- companyName: '',
- phone: '',
- initialPlan: 'STANDARD',
- });
- const [stats, setStats] = useState({
- total: 0,
- approved: 0,
- pending: 0,
- });
+  const queryClient = useQueryClient();
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
+  const [filterTab, setFilterTab] = useState<'all' | 'pending' | 'approved' | 'suspended'>('all');
+  const [formData, setFormData] = useState({
+    name: '', email: '', companyName: '', phone: '', initialPlan: 'STANDARD',
+  });
 
- useEffect(() => {
- fetchAgents();
- }, []);
+  const { data: agents = [], isLoading } = useQuery({
+    queryKey: ['admin-agents'],
+    queryFn: getPendingAgents,
+  });
 
- const fetchAgents = async () => {
- try {
- const agentsList = await getPendingAgents();
- setAgents(agentsList);
+  const approveMutation = useMutation({
+    mutationFn: (agentId: string) => approveAgentAccount(agentId, 'admin'),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-agents'] });
+      setSelectedAgent(null);
+    },
+  });
 
- const approved = agentsList.filter(a => a.status === 'APPROVED').length;
- const pending = agentsList.filter(a => a.status === 'PENDING').length;
+  const suspendMutation = useMutation({
+    mutationFn: ({ agentId, reason }: { agentId: string; reason: string }) =>
+      suspendAgentAccount(agentId, 'admin', reason),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-agents'] });
+      setSelectedAgent(null);
+    },
+  });
 
- setStats({
- total: agentsList.length,
- approved,
- pending,
- });
- } catch (error) {
- console.error('Error fetching agents:', error);
- } finally {
- setLoading(false);
- }
- };
+  const resendMutation = useMutation({
+    mutationFn: (agentId: string) => resendAgentInvite(agentId, 'admin'),
+    onSuccess: (token) => {
+      const link = `${window.location.origin}/agent/activate?token=${token}`;
+      navigator.clipboard.writeText(link);
+      alert('Invite link copied to clipboard!');
+      queryClient.invalidateQueries({ queryKey: ['admin-agents'] });
+    },
+  });
 
- const handleCreateAgent = async (e: React.FormEvent) => {
- e.preventDefault();
- try {
- await createAgentWithInvite('admin_current', {
- fullName: formData.name,
- email: formData.email,
- companyName: formData.companyName,
- phone: formData.phone,
- initialPlan: formData.initialPlan,
- });
+  const createMutation = useMutation({
+    mutationFn: () => createAgentWithInvite('admin', {
+      fullName: formData.name,
+      email: formData.email,
+      companyName: formData.companyName,
+      phone: formData.phone,
+      initialPlan: formData.initialPlan,
+    }),
+    onSuccess: (result) => {
+      const link = result.inviteLink;
+      navigator.clipboard.writeText(link);
+      alert(`Agent created! Invite link copied:\n${link}`);
+      setFormData({ name: '', email: '', companyName: '', phone: '', initialPlan: 'STANDARD' });
+      setShowCreateForm(false);
+      queryClient.invalidateQueries({ queryKey: ['admin-agents'] });
+    },
+    onError: () => alert('Failed to create agent.'),
+  });
 
- setFormData({
- name: '',
- email: '',
- companyName: '',
- phone: '',
- initialPlan: 'STANDARD',
- });
- setShowCreateForm(false);
+  const getStatusBadge = (agent: Agent) => {
+    if (agent.isSuspended) return <span className="px-2 py-1 bg-red-500/10 text-red-400 rounded-lg text-[9px] font-black uppercase tracking-widest border border-red-500/20">🚫 Suspended</span>;
+    if (agent.isApproved) return <span className="px-2 py-1 bg-emerald-500/10 text-emerald-400 rounded-lg text-[9px] font-black uppercase tracking-widest border border-emerald-500/20">✓ Approved</span>;
+    if (agent.inviteStatus === 'USED') return <span className="px-2 py-1 bg-amber-500/10 text-amber-400 rounded-lg text-[9px] font-black uppercase tracking-widest border border-amber-500/20">⌛ Needs Approval</span>;
+    if (agent.inviteStatus === 'EXPIRED') return <span className="px-2 py-1 bg-red-500/10 text-red-400 rounded-lg text-[9px] font-black uppercase tracking-widest border border-red-500/20">✕ Expired</span>;
+    return <span className="px-2 py-1 bg-slate-700 text-slate-400 rounded-lg text-[9px] font-black uppercase tracking-widest">⏳ Pending Activation</span>;
+  };
 
- // Refresh agents list
- await fetchAgents();
- alert('Agent created successfully!');
- } catch (error) {
- console.error('Error creating agent:', error);
- alert('Failed to create agent');
- }
- };
+  const filtered = agents.filter((a: Agent) => {
+    if (filterTab === 'pending') return !a.isApproved && !a.isSuspended;
+    if (filterTab === 'approved') return a.isApproved && !a.isSuspended;
+    if (filterTab === 'suspended') return a.isSuspended;
+    return true;
+  });
 
- const handleResendInvite = async (agentId: string) => {
- try {
- const newToken = await resendAgentInvite(agentId, 'admin_resend');
- const inviteLink = `${window.location.origin}/agent/activate?token=${newToken}`;
- navigator.clipboard.writeText(inviteLink);
- alert('Invite link copied to clipboard!');
- await fetchAgents();
- } catch (error) {
- console.error('Error resending invite:', error);
- alert('Failed to resend invite');
- }
- };
+  const stats = {
+    total: agents.length,
+    approved: agents.filter((a: Agent) => a.isApproved && !a.isSuspended).length,
+    pending: agents.filter((a: Agent) => !a.isApproved && !a.isSuspended).length,
+    suspended: agents.filter((a: Agent) => a.isSuspended).length,
+  };
 
- const handleApproveAccount = async (agentId: string) => {
- if (window.confirm('Are you sure you want to approve this agent account for publishing?')) {
- try {
- await approveAgentAccount(agentId, 'admin_current');
- alert('Agent account approved!');
- await fetchAgents();
- } catch (error) {
- console.error('Error approving agent:', error);
- alert('Failed to approve agent');
- }
- }
- };
+  return (
+    <div className="p-4 sm:p-8 max-w-6xl mx-auto">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+        <div>
+          <h1 className="text-3xl font-black text-white tracking-tight">Agent Management</h1>
+          <p className="text-slate-500 mt-1">Create, approve, and manage platform agents</p>
+        </div>
+        <button
+          onClick={() => setShowCreateForm(!showCreateForm)}
+          className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold transition-colors text-sm"
+        >
+          {showCreateForm ? '✕ Cancel' : '+ Create Agent'}
+        </button>
+      </div>
 
- const getStatusBadge = (status: string, inviteStatus?: string, isApproved?: boolean) => {
- if (status === 'APPROVED' && inviteStatus === 'USED') {
- if (isApproved) {
- return <span className="px-3 py-1 bg-emerald-500/10 text-emerald-500 rounded-xl text-[9px] font-black uppercase tracking-widest border border-emerald-500/20">✓ Approved</span>;
- }
- return <span className="px-3 py-1 bg-amber-500/10 text-amber-500 rounded-xl text-[9px] font-black uppercase tracking-widest border border-amber-500/20">⌛ Needs Approval</span>;
- }
- if (status === 'PENDING' || inviteStatus === 'SENT') {
- return <span className="px-3 py-1 bg-slate-800 text-slate-400 rounded-xl text-[9px] font-black uppercase tracking-widest border border-slate-700/20">⏳ Pending Activation</span>;
- }
- if (inviteStatus === 'EXPIRED') {
- return <span className="px-3 py-1 bg-red-500/10 text-red-500 rounded-xl text-[9px] font-black uppercase tracking-widest border border-red-500/20">✕ Expired</span>;
- }
- return <span className="px-3 py-1 bg-slate-700/50 text-slate-300 rounded-xl text-[9px] font-black uppercase tracking-widest border border-slate-600/20">Unknown</span>;
- };
+      {/* Stats */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+        {[
+          { label: 'Total', value: stats.total, color: 'border-slate-700 text-white' },
+          { label: 'Approved', value: stats.approved, color: 'border-emerald-500/20 text-emerald-400' },
+          { label: 'Pending', value: stats.pending, color: 'border-amber-500/20 text-amber-400' },
+          { label: 'Suspended', value: stats.suspended, color: 'border-red-500/20 text-red-400' },
+        ].map(({ label, value, color }) => (
+          <div key={label} className={`bg-slate-900 border rounded-2xl p-4 ${color}`}>
+            <p className="text-[9px] font-black uppercase tracking-widest opacity-70 mb-1">{label}</p>
+            <p className="text-2xl font-black">{value}</p>
+          </div>
+        ))}
+      </div>
 
- if (loading) {
- return (
- <div className="flex items-center justify-center h-full">
- <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
- </div>
- );
- }
+      {/* Create Form */}
+      {showCreateForm && (
+        <div className="bg-slate-900 border border-slate-700 rounded-2xl p-6 mb-8">
+          <h2 className="text-xl font-black text-white mb-6">Create New Agent</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {[
+              { placeholder: 'Full Name', key: 'name', type: 'text' },
+              { placeholder: 'Email', key: 'email', type: 'email' },
+              { placeholder: 'Company Name', key: 'companyName', type: 'text' },
+              { placeholder: 'Phone (optional)', key: 'phone', type: 'tel' },
+            ].map(({ placeholder, key, type }) => (
+              <input
+                key={key}
+                type={type}
+                placeholder={placeholder}
+                value={formData[key as keyof typeof formData]}
+                onChange={(e) => setFormData({ ...formData, [key]: e.target.value })}
+                className="px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none"
+              />
+            ))}
+            <select
+              value={formData.initialPlan}
+              onChange={(e) => setFormData({ ...formData, initialPlan: e.target.value })}
+              className="px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white focus:border-indigo-500 focus:outline-none"
+            >
+              <option value="STARTER">Basic (5 machineries)</option>
+              <option value="STANDARD">Pro (15 machineries)</option>
+              <option value="PROFESSIONAL">Enterprise (Unlimited)</option>
+            </select>
+          </div>
+          <button
+            onClick={() => createMutation.mutate()}
+            disabled={createMutation.isPending || !formData.name || !formData.email || !formData.companyName}
+            className="mt-4 w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold transition-colors disabled:opacity-50"
+          >
+            {createMutation.isPending ? 'Creating...' : 'Create & Copy Invite Link'}
+          </button>
+        </div>
+      )}
 
- return (
- <div className="p-4 sm:p-8 max-w-6xl mx-auto">
- {/* Header */}
- <div className="mb-8">
- <h1 className="text-3xl font-black text-white tracking-tight">Agent Management</h1>
- <p className="text-slate-500 mt-1">Create, approve, and manage platform agents</p>
- </div>
+      {/* Filter Tabs */}
+      <div className="flex gap-2 mb-6">
+        {(['all', 'pending', 'approved', 'suspended'] as const).map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setFilterTab(tab)}
+            className={`px-4 py-2 rounded-xl font-bold text-sm transition-colors ${filterTab === tab ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-400 hover:text-white'}`}
+          >
+            {tab.charAt(0).toUpperCase() + tab.slice(1)}
+          </button>
+        ))}
+      </div>
 
- {/* Stats */}
- <div className="grid grid-cols-3 gap-4 mb-8">
- <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4">
- <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Total</p>
- <p className="text-2xl font-black text-white">{stats.total}</p>
- </div>
- <div className="bg-emerald-600/10 border border-emerald-500/20 rounded-2xl p-4">
- <p className="text-[9px] font-black text-emerald-400 uppercase tracking-widest mb-1">Approved</p>
- <p className="text-2xl font-black text-emerald-400">{stats.approved}</p>
- </div>
- <div className="bg-amber-600/10 border border-amber-500/20 rounded-2xl p-4">
- <p className="text-[9px] font-black text-amber-400 uppercase tracking-widest mb-1">Pending</p>
- <p className="text-2xl font-black text-amber-400">{stats.pending}</p>
- </div>
- </div>
+      {/* Agents Table */}
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-slate-800 bg-slate-800/50">
+                <th className="px-6 py-4 text-left text-xs font-black text-slate-400 uppercase tracking-widest">Agent</th>
+                <th className="px-6 py-4 text-left text-xs font-black text-slate-400 uppercase tracking-widest">Company</th>
+                <th className="px-6 py-4 text-left text-xs font-black text-slate-400 uppercase tracking-widest">Status</th>
+                <th className="px-6 py-4 text-left text-xs font-black text-slate-400 uppercase tracking-widest">Joined</th>
+                <th className="px-6 py-4 text-right text-xs font-black text-slate-400 uppercase tracking-widest">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {isLoading ? (
+                <tr><td colSpan={5} className="px-6 py-12 text-center"><div className="w-7 h-7 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto" /></td></tr>
+              ) : filtered.length === 0 ? (
+                <tr><td colSpan={5} className="px-6 py-12 text-center text-slate-500">No agents in this category.</td></tr>
+              ) : (
+                filtered.map((agent: Agent) => (
+                  <tr
+                    key={agent.id}
+                    className="border-b border-slate-800/60 hover:bg-slate-800/30 transition-colors cursor-pointer"
+                    onClick={() => setSelectedAgent(agent)}
+                  >
+                    <td className="px-6 py-4">
+                      <p className="text-white font-bold text-sm">{agent.name}</p>
+                      <p className="text-slate-500 text-xs">{agent.email}</p>
+                    </td>
+                    <td className="px-6 py-4 text-slate-400 text-sm">{agent.companyName}</td>
+                    <td className="px-6 py-4">{getStatusBadge(agent)}</td>
+                    <td className="px-6 py-4 text-slate-500 text-xs">
+                      {new Date(agent.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
+                      <div className="flex items-center justify-end gap-2">
+                        {agent.inviteStatus === 'USED' && !agent.isApproved && !agent.isSuspended && (
+                          <button
+                            onClick={() => approveMutation.mutate(agent.id)}
+                            disabled={approveMutation.isPending}
+                            className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-black uppercase rounded-lg transition-colors"
+                          >
+                            Approve
+                          </button>
+                        )}
+                        {(agent.inviteStatus === 'SENT' || agent.inviteStatus === 'EXPIRED') && (
+                          <button
+                            onClick={() => resendMutation.mutate(agent.id)}
+                            disabled={resendMutation.isPending}
+                            className="text-indigo-400 hover:text-indigo-300 text-xs font-bold"
+                          >
+                            Resend Invite
+                          </button>
+                        )}
+                        {agent.isApproved && !agent.isSuspended && (
+                          <button
+                            onClick={() => {
+                              if (window.confirm(`Suspend ${agent.name}? They will lose publishing access.`)) {
+                                suspendMutation.mutate({ agentId: agent.id, reason: 'Suspended by admin' });
+                              }
+                            }}
+                            disabled={suspendMutation.isPending}
+                            className="px-3 py-1.5 bg-red-600/10 hover:bg-red-600/20 text-red-400 text-[10px] font-black uppercase border border-red-500/20 rounded-lg transition-colors"
+                          >
+                            Suspend
+                          </button>
+                        )}
+                        {agent.isSuspended && (
+                          <button
+                            onClick={() => approveMutation.mutate(agent.id)}
+                            disabled={approveMutation.isPending}
+                            className="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white text-[10px] font-black uppercase rounded-lg transition-colors"
+                          >
+                            Reinstate
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
- {/* Create Agent Button */}
- <button
- onClick={() => setShowCreateForm(!showCreateForm)}
- className="mb-8 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition-colors"
- >
- {showCreateForm ? 'Cancel' : '+ Create Agent'}
- </button>
+      {/* Agent Detail Modal */}
+      {selectedAgent && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setSelectedAgent(null)}>
+          <div className="bg-slate-900 border border-slate-700 rounded-3xl p-8 max-w-md w-full shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between items-start mb-6">
+              <div>
+                <h2 className="text-xl font-black text-white">{selectedAgent.name}</h2>
+                <p className="text-slate-400 text-sm">{selectedAgent.companyName}</p>
+              </div>
+              <button onClick={() => setSelectedAgent(null)} className="text-slate-500 hover:text-white transition-colors">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
 
- {/* Create Form */}
- {showCreateForm && (
- <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 mb-8">
- <h2 className="text-xl font-black text-white mb-6">Create New Agent</h2>
- <form onSubmit={handleCreateAgent} className="space-y-4">
- <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
- <input
- type="text"
- placeholder="Name"
- value={formData.name}
- onChange={(e) => setFormData({ ...formData, name: e.target.value })}
- required
- className="px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none"
- />
- <input
- type="email"
- placeholder="Email"
- value={formData.email}
- onChange={(e) => setFormData({ ...formData, email: e.target.value })}
- required
- className="px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none"
- />
- <input
- type="text"
- placeholder="Company Name"
- value={formData.companyName}
- onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
- required
- className="px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none"
- />
- <input
- type="tel"
- placeholder="Phone"
- value={formData.phone}
- onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
- className="px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none"
- />
- <select
- value={formData.initialPlan}
- onChange={(e) => setFormData({ ...formData, initialPlan: e.target.value })}
- className="px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white focus:border-indigo-500 focus:outline-none"
- >
- <option value="STARTER">Starter</option>
- <option value="STANDARD">Standard</option>
- <option value="PROFESSIONAL">Professional</option>
- </select>
- </div>
- <button
- type="submit"
- className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition-colors w-full"
- >
- Create Agent
- </button>
- </form>
- </div>
- )}
+            <div className="space-y-3 mb-8">
+              {[
+                { label: 'Email', value: selectedAgent.email },
+                { label: 'Phone', value: selectedAgent.phone || '—' },
+                { label: 'Joined', value: new Date(selectedAgent.createdAt).toLocaleDateString() },
+                { label: 'Invite Status', value: selectedAgent.inviteStatus || '—' },
+                { label: 'Account Status', value: selectedAgent.isSuspended ? 'Suspended' : selectedAgent.isApproved ? 'Approved' : 'Pending' },
+              ].map(({ label, value }) => (
+                <div key={label} className="flex justify-between items-center py-2 border-b border-slate-800">
+                  <span className="text-slate-500 text-sm">{label}</span>
+                  <span className="text-white text-sm font-medium">{value}</span>
+                </div>
+              ))}
+            </div>
 
- {/* Agents Table */}
- <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
- <div className="overflow-x-auto">
- <table className="w-full">
- <thead>
- <tr className="border-b border-slate-800 bg-slate-800/50">
- <th className="px-6 py-4 text-left text-xs font-black text-slate-400 uppercase tracking-widest">Name</th>
- <th className="px-6 py-4 text-left text-xs font-black text-slate-400 uppercase tracking-widest">Company</th>
- <th className="px-6 py-4 text-left text-xs font-black text-slate-400 uppercase tracking-widest">Email</th>
- <th className="px-6 py-4 text-left text-xs font-black text-slate-400 uppercase tracking-widest">Status</th>
- <th className="px-6 py-4 text-left text-xs font-black text-slate-400 uppercase tracking-widest">Actions</th>
- </tr>
- </thead>
- <tbody>
- {agents.map((agent) => (
- <tr key={agent.id} className="border-b border-slate-800 hover:bg-slate-800/30 transition-colors">
- <td className="px-6 py-4 text-white font-bold">{agent.name}</td>
- <td className="px-6 py-4 text-slate-400">{agent.companyName}</td>
- <td className="px-6 py-4 text-slate-400 text-sm">{agent.email}</td>
- <td className="px-6 py-4">{getStatusBadge(agent.status, agent.inviteStatus, agent.isApproved)}</td>
- <td className="px-6 py-4 text-right">
- <div className="flex items-center justify-end gap-3">
- {agent.status === 'APPROVED' && agent.inviteStatus === 'USED' && !agent.isApproved && (
- <button
- onClick={() => handleApproveAccount(agent.id)}
- className="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-black uppercase rounded-lg transition-colors"
- >
- Approve Account
- </button>
- )}
- {(agent.inviteStatus === 'SENT' || agent.inviteStatus === 'EXPIRED') && (
- <button
- onClick={() => handleResendInvite(agent.id)}
- className="text-indigo-400 hover:text-indigo-300 text-sm font-bold"
- >
- Resend Invite
- </button>
- )}
- {agent.isApproved && (
- <span className="text-slate-500 text-xs italic">Operational</span>
- )}
- </div>
- </td>
- </tr>
- ))}
- </tbody>
- </table>
- </div>
- {agents.length === 0 && (
- <div className="p-8 text-center text-slate-500">No agents yet. Create one to get started.</div>
- )}
- </div>
- </div>
- );
+            <div className="flex gap-3">
+              {!selectedAgent.isApproved && !selectedAgent.isSuspended && selectedAgent.inviteStatus === 'USED' && (
+                <button
+                  onClick={() => approveMutation.mutate(selectedAgent.id)}
+                  className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-sm transition-colors"
+                >
+                  Approve Account
+                </button>
+              )}
+              {selectedAgent.isApproved && !selectedAgent.isSuspended && (
+                <button
+                  onClick={() => {
+                    suspendMutation.mutate({ agentId: selectedAgent.id, reason: 'Suspended by admin' });
+                  }}
+                  className="flex-1 py-3 bg-red-600/20 hover:bg-red-600/30 text-red-400 border border-red-500/20 rounded-xl font-bold text-sm transition-colors"
+                >
+                  Suspend Agent
+                </button>
+              )}
+              {selectedAgent.isSuspended && (
+                <button
+                  onClick={() => approveMutation.mutate(selectedAgent.id)}
+                  className="flex-1 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold text-sm transition-colors"
+                >
+                  Reinstate Agent
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default AdminAgentManagement;

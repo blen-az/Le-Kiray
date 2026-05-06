@@ -173,12 +173,31 @@ export const approveAgentAccount = async (agentId: string, adminId: string): Pro
  try {
  await updateDoc(doc(db, USERS_COLLECTION, agentId), {
  isApproved: true,
+ isSuspended: false,
  updatedAt: new Date().toISOString(),
  });
 
  await logAudit(adminId, agentId, 'APPROVE_AGENT', 'Admin approved agent account for publishing');
  } catch (error) {
  console.error('Error approving agent account:', error);
+ throw error;
+ }
+};
+
+/**
+ * Suspend agent account (Admin only)
+ */
+export const suspendAgentAccount = async (agentId: string, adminId: string, reason?: string): Promise<void> => {
+ try {
+ await updateDoc(doc(db, USERS_COLLECTION, agentId), {
+ isApproved: false,
+ isSuspended: true,
+ updatedAt: new Date().toISOString(),
+ });
+
+ await logAudit(adminId, agentId, 'SUSPEND_AGENT', reason || 'Admin suspended agent account');
+ } catch (error) {
+ console.error('Error suspending agent account:', error);
  throw error;
  }
 };

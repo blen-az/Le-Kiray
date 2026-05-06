@@ -173,3 +173,18 @@ export const countNewLeads = async (agentId: string): Promise<number> => {
  throw error;
  }
 };
+
+/**
+ * Get ALL quote requests across the platform (Admin only)
+ */
+export const getAllLeadsAdmin = async (): Promise<QuoteRequest[]> => {
+ try {
+ const q = query(collection(db, COLLECTION));
+ const snapshot = await getDocs(q);
+ const leads = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as QuoteRequest));
+ return leads.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+ } catch (error) {
+ console.error('Error fetching all leads (admin):', error);
+ throw error;
+ }
+};

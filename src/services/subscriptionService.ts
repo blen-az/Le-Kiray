@@ -156,13 +156,44 @@ export const updateSubscriptionStatus = async (
 ): Promise<void> => {
  try {
  const docRef = doc(db, SUBSCRIPTIONS_COLLECTION, id);
-
  await updateDoc(docRef, {
  status,
  updatedAt: new Date().toISOString(),
  });
  } catch (error) {
  console.error('Error updating subscription status:', error);
+ throw error;
+ }
+};
+
+/**
+ * Admin manual plan override — upgrades/downgrades an agent to any plan immediately
+ */
+export const adminOverridePlan = async (
+ subscriptionId: string,
+ planId: string
+): Promise<void> => {
+ try {
+ const plans = await getSubscriptionPlans();
+ const plan = plans.find(p => p.id === planId);
+ if (!plan) throw new Error('Plan not found');
+
+ const now = new Date();
+ const periodEnd = new Date(now);
+ periodEnd.setMonth(periodEnd.getMonth() + plan.durationMonths);
+
+ await updateDoc(doc(db, SUBSCRIPTIONS_COLLECTION, subscriptionId), {
+ planId: plan.id,
+ planName: plan.name,
+ maxVehicles: plan.maxVehicles,
+ status: 'active',
+ currentPeriodStart: now.toISOString(),
+ currentPeriodEnd: periodEnd.toISOString(),
+ updatedAt: now.toISOString(),
+ overriddenByAdmin: true,
+ });
+ } catch (error) {
+ console.error('Error overriding subscription plan:', error);
  throw error;
  }
 };

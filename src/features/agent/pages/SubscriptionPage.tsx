@@ -221,11 +221,15 @@ const SubscriptionPage: React.FC = () => {
  </li>
  </ul>
 
- {isCurrentPlan ? (
- <div className="w-full py-4 bg-indigo-50 text-indigo-600 rounded-2xl text-sm font-black text-center border border-indigo-100">
- ACTIVE PLAN
- </div>
- ) : (
+  {isCurrentPlan ? (
+  <div className={`w-full py-4 rounded-2xl text-sm font-black text-center border ${
+    usage?.subscription?.status === 'pending'
+      ? 'bg-amber-50 text-amber-600 border-amber-200'
+      : 'bg-indigo-50 text-indigo-600 border-indigo-100'
+  }`}>
+    {usage?.subscription?.status === 'pending' ? '⌛ PENDING APPROVAL' : '✓ ACTIVE PLAN'}
+  </div>
+  ) : (
  <button
  onClick={() => handleSelectPlan(plan.id)}
  className={`w-full py-4 rounded-2xl text-sm font-black transition-all ${
