@@ -85,9 +85,7 @@ export const createQuoteRequest = async (
  throw new Error('Listing not found');
  }
 
- if (listing.category !== VehicleCategory.EARTH_MOVING) {
- throw new Error('Quote requests are only for earth-moving equipment. Use booking instead.');
- }
+  // All listings are quote-based for heavy machinery
 
  if (listing.status !== 'active') {
  throw new Error('Listing is not available for quote requests');

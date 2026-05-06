@@ -42,10 +42,8 @@ const AnalyticsPage: React.FC = () => {
  // Count bookings by category
  const categoryCount: Record<string, number> = {};
  for (const listing of listings) {
- if (listing.category !== VehicleCategory.EARTH_MOVING) {
  const catName = listing.category.replace('_', ' ');
  categoryCount[catName] = (categoryCount[catName] || 0) + 1;
- }
  }
 
  // Count leads by status

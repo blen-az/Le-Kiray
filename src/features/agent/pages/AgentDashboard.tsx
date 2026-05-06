@@ -55,9 +55,9 @@ const AgentDashboard: React.FC = () => {
  }
 
  return (
- <div className="p-8">
- {/* Status Alerts */}
- <div className="space-y-4 mb-10">
+    <div className="p-4 md:p-8">
+      {/* Status Alerts */}
+      <div className="space-y-4 mb-8 md:mb-10">
  {!user.isApproved && (
  <div className="bg-amber-600/10 border border-amber-600/20 rounded-2xl p-6 flex items-start gap-4">
  <div className="w-10 h-10 bg-amber-600/20 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -99,75 +99,75 @@ const AgentDashboard: React.FC = () => {
  )}
  </div>
 
- {/* Stats Grid */}
- <div className="grid grid-cols-2 gap-6 mb-10">
- <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
- <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Fleet Usage</p>
- <p className="text-3xl font-black text-slate-900 ">{stats.activeListings}<span className="text-lg text-slate-500">/{stats.maxListings}</span></p>
- <div className="mt-4 h-2 bg-slate-200 rounded-full overflow-hidden">
- <div 
- className="h-full bg-indigo-600 rounded-full transition-all"
- style={{ width: `${stats.maxListings > 0 ? (stats.activeListings / stats.maxListings) * 100 : 0}%` }}
- />
- </div>
- </div>
+      {/* Stats Grid */}
+      <div className="grid grid-cols-2 gap-4 sm:gap-6 mb-8 sm:mb-10">
+        <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-sm">
+          <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Fleet Usage</p>
+          <p className="text-2xl sm:text-3xl font-black text-slate-900 ">{stats.activeListings}<span className="text-base sm:text-lg text-slate-500">/{stats.maxListings}</span></p>
+          <div className="mt-4 h-2 bg-slate-200 rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-indigo-600 rounded-full transition-all"
+              style={{ width: `${stats.maxListings > 0 ? (stats.activeListings / stats.maxListings) * 100 : 0}%` }}
+            />
+          </div>
+        </div>
 
- <div className="bg-indigo-600 rounded-2xl p-6 shadow-lg shadow-indigo-500/20">
- <p className="text-[10px] font-black text-indigo-200 uppercase tracking-widest mb-2">Pending Bookings</p>
- <p className="text-3xl font-black text-white">{stats.pendingBookings}</p>
- <Link to="/agent/bookings" className="text-xs font-bold text-indigo-200 hover:text-white mt-4 inline-block">
- View All →
- </Link>
- </div>
+        <div className="bg-indigo-600 rounded-2xl p-4 sm:p-6 shadow-lg shadow-indigo-500/20">
+          <p className="text-[10px] font-black text-indigo-200 uppercase tracking-widest mb-2">Pending Bookings</p>
+          <p className="text-2xl sm:text-3xl font-black text-white">{stats.pendingBookings}</p>
+          <Link to="/agent/bookings" className="text-[10px] sm:text-xs font-bold text-indigo-200 hover:text-white mt-4 inline-block">
+            View All →
+          </Link>
+        </div>
 
- <div className="bg-amber-600 rounded-2xl p-6 shadow-lg shadow-amber-500/20">
- <p className="text-[10px] font-black text-amber-200 uppercase tracking-widest mb-2">New Leads</p>
- <p className="text-3xl font-black text-white">{stats.newLeads}</p>
- <Link to="/agent/leads" className="text-xs font-bold text-amber-200 hover:text-white mt-4 inline-block">
- View All →
- </Link>
- </div>
+        <div className="bg-amber-600 rounded-2xl p-4 sm:p-6 shadow-lg shadow-amber-500/20">
+          <p className="text-[10px] font-black text-amber-200 uppercase tracking-widest mb-2">New Leads</p>
+          <p className="text-2xl sm:text-3xl font-black text-white">{stats.newLeads}</p>
+          <Link to="/agent/leads" className="text-[10px] sm:text-xs font-bold text-amber-200 hover:text-white mt-4 inline-block">
+            View All →
+          </Link>
+        </div>
 
- <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
- <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Subscription</p>
- <p className="text-3xl font-black text-slate-900 ">{stats.daysRemaining}<span className="text-lg text-slate-500"> days</span></p>
- <Link to="/agent/subscription" className="text-xs font-bold text-slate-500 hover:text-slate-900 mt-4 inline-block">
- Manage Plan →
- </Link>
- </div>
- </div>
+        <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-sm">
+          <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Subscription</p>
+          <p className="text-2xl sm:text-3xl font-black text-slate-900 ">{stats.daysRemaining}<span className="text-base sm:text-lg text-slate-500"> days</span></p>
+          <Link to="/agent/subscription" className="text-[10px] sm:text-xs font-bold text-slate-500 hover:text-slate-900 mt-4 inline-block">
+            Manage Plan →
+          </Link>
+        </div>
+      </div>
 
- {/* Quick Actions */}
- <div className="grid grid-cols-2 gap-8 mb-10">
- <Link 
- to="/agent/listings/new"
- className="bg-white border border-slate-200 hover:border-indigo-500 rounded-2xl p-8 flex items-center gap-6 transition-all group shadow-sm"
- >
- <div className="w-14 h-14 bg-indigo-600/10 rounded-2xl flex items-center justify-center group-hover:bg-indigo-600/20 transition-colors">
- <svg className="w-7 h-7 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
- <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
- </svg>
- </div>
- <div>
- <h3 className="text-lg font-black text-slate-900 ">Add New Vehicle</h3>
- <p className="text-sm text-slate-500 ">List a car, van, or heavy equipment</p>
- </div>
- </Link>
+      {/* Quick Actions */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8 mb-8 sm:mb-10">
+        <Link 
+          to="/agent/listings/new"
+          className="bg-white border border-slate-200 hover:border-indigo-500 rounded-2xl p-5 sm:p-8 flex items-center gap-4 sm:gap-6 transition-all group shadow-sm"
+        >
+          <div className="w-12 h-12 sm:w-14 sm:h-14 shrink-0 bg-indigo-600/10 rounded-2xl flex items-center justify-center group-hover:bg-indigo-600/20 transition-colors">
+            <svg className="w-6 h-6 sm:w-7 sm:h-7 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+            </svg>
+          </div>
+          <div>
+            <h3 className="text-base sm:text-lg font-black text-slate-900 ">Add New Vehicle</h3>
+            <p className="text-xs sm:text-sm text-slate-500 mt-0.5 sm:mt-1">List a car, van, or heavy equipment</p>
+          </div>
+        </Link>
 
- <Link 
- to="/agent/fleet"
- className="bg-white border border-slate-200 hover:border-indigo-500 rounded-2xl p-8 flex items-center gap-6 transition-all group shadow-sm"
- >
- <div className="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center group-hover:bg-slate-200 transition-colors">
- <svg className="w-7 h-7 text-slate-500 " fill="none" stroke="currentColor" viewBox="0 0 24 24">
- <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
- </svg>
- </div>
- <div>
- <h3 className="text-lg font-black text-slate-900 ">Manage Fleet</h3>
- <p className="text-sm text-slate-500 ">Edit, pause, or update your listings</p>
- </div>
- </Link>
+        <Link 
+          to="/agent/fleet"
+          className="bg-white border border-slate-200 hover:border-indigo-500 rounded-2xl p-5 sm:p-8 flex items-center gap-4 sm:gap-6 transition-all group shadow-sm"
+        >
+          <div className="w-12 h-12 sm:w-14 sm:h-14 shrink-0 bg-slate-100 rounded-2xl flex items-center justify-center group-hover:bg-slate-200 transition-colors">
+            <svg className="w-6 h-6 sm:w-7 sm:h-7 text-slate-500 " fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+          </div>
+          <div>
+            <h3 className="text-base sm:text-lg font-black text-slate-900 ">Manage Fleet</h3>
+            <p className="text-xs sm:text-sm text-slate-500 mt-0.5 sm:mt-1">Edit, pause, or update your listings</p>
+          </div>
+        </Link>
  </div>
 
  {/* Recent Activity */}

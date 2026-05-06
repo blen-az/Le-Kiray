@@ -1,12 +1,13 @@
-
 // ==================== ENUMS ====================
 
 export enum VehicleCategory {
- COMPACT = 'COMPACT',
- MID_SIZE = 'MID_SIZE',
- FAMILY = 'FAMILY',
- VAN = 'VAN',
- EARTH_MOVING = 'EARTH_MOVING'
+  EXCAVATOR = 'EXCAVATOR',
+  DOZER = 'DOZER',
+  LOADER = 'LOADER',
+  CRANE = 'CRANE',
+  DUMP_TRUCK = 'DUMP_TRUCK',
+  COMPACTOR = 'COMPACTOR',
+  OTHER_MACHINERY = 'OTHER_MACHINERY'
 }
 
 export enum UserRole {
@@ -218,12 +219,12 @@ export interface AuditLog {
 
 // Helper to check if category is bookable (cars/vans)
 export const isBookableCategory = (category: VehicleCategory): boolean => {
- return category !== VehicleCategory.EARTH_MOVING;
+  return false; // All heavy machinery is quote-based
 };
 
 // Helper to check if category requires quote (earth-moving)
 export const isQuoteCategory = (category: VehicleCategory): boolean => {
- return category === VehicleCategory.EARTH_MOVING;
+  return true; // All heavy machinery is quote-based
 };
 
 // ==================== REVIEW TYPES ====================

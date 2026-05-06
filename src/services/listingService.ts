@@ -227,17 +227,13 @@ export const countActiveListings = async (agentId: string): Promise<number> => {
 
 /**
  * Enforce category-specific rules on listing data
- * - EARTH_MOVING: Remove pricing fields
- * - Cars/Vans: Ensure pricing exists
+ * All machinery uses quote-based pricing, so remove pricing fields
  */
 const enforceCategoryRules = <T extends Partial<Listing>>(data: T): T => {
  const result = { ...data };
 
- if (data.category === VehicleCategory.EARTH_MOVING) {
- // Remove pricing fields for earth-moving equipment
  delete result.dailyRate;
  delete result.weeklyRate;
- }
 
  return result;
 };

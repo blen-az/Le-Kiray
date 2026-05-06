@@ -17,10 +17,13 @@ const VehicleFilters: React.FC<VehicleFiltersProps> = ({
 }) => {
   const categories = [
     { label: 'All Equipment', value: 'ALL' },
-    { label: 'Earth Moving', value: VehicleCategory.EARTH_MOVING },
-    { label: 'Logistics / Vans', value: VehicleCategory.VAN },
-    { label: 'Compact Units', value: VehicleCategory.COMPACT },
-    { label: 'Mid-Size', value: VehicleCategory.MID_SIZE },
+    { label: 'Excavators', value: VehicleCategory.EXCAVATOR },
+    { label: 'Dozers', value: VehicleCategory.DOZER },
+    { label: 'Loaders', value: VehicleCategory.LOADER },
+    { label: 'Cranes', value: VehicleCategory.CRANE },
+    { label: 'Dump Trucks', value: VehicleCategory.DUMP_TRUCK },
+    { label: 'Compactors', value: VehicleCategory.COMPACTOR },
+    { label: 'Other', value: VehicleCategory.OTHER_MACHINERY },
   ];
 
  return (

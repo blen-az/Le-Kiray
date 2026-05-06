@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../auth/context/AuthContext';
 import { UserRole } from '../../../types';
@@ -11,8 +11,18 @@ const Landing: React.FC = () => {
  const isAgent = currentUser?.role === UserRole.AGENT;
  const isConsumer = currentUser?.role === UserRole.CONSUMER;
 
+ useEffect(() => {
+   if (isAgent) {
+     navigate('/agent/dashboard', { replace: true });
+   }
+ }, [isAgent, navigate]);
+
  if (isConsumer) {
- return <ConsumerHome />;
+   return <ConsumerHome />;
+ }
+
+ if (isAgent) {
+   return null; // Avoid flash while redirecting
  }
 
  return (
