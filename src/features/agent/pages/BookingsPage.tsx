@@ -3,12 +3,12 @@ import { Booking, BookingStatus } from '../../../types';
 import { getBookingsByAgent, updateBookingStatus } from '../../../services/bookingService';
 import { useAuth } from '../../../features/auth/context/AuthContext';
 
-const STATUS_OPTIONS: { value: BookingStatus; label: string; color: string }[] = [
- { value: 'pending', label: 'Pending', color: 'amber' },
- { value: 'confirmed', label: 'Confirmed', color: 'indigo' },
- { value: 'in_progress', label: 'In Progress', color: 'blue' },
- { value: 'completed', label: 'Completed', color: 'emerald' },
- { value: 'cancelled', label: 'Cancelled', color: 'red' },
+const STATUS_OPTIONS: { value: BookingStatus; label: string; colorClass: string; lightColorClass: string }[] = [
+ { value: 'pending', label: 'Pending', colorClass: 'bg-amber-600', lightColorClass: 'bg-amber-500/10 text-amber-600' },
+ { value: 'confirmed', label: 'Confirmed', colorClass: 'bg-indigo-600', lightColorClass: 'bg-indigo-500/10 text-indigo-600' },
+ { value: 'in_progress', label: 'In Progress', colorClass: 'bg-blue-600', lightColorClass: 'bg-blue-500/10 text-blue-600' },
+ { value: 'completed', label: 'Completed', colorClass: 'bg-emerald-600', lightColorClass: 'bg-emerald-500/10 text-emerald-600' },
+ { value: 'cancelled', label: 'Cancelled', colorClass: 'bg-red-600', lightColorClass: 'bg-red-500/10 text-red-600' },
 ];
 
 const BookingsPage: React.FC = () => {
@@ -50,9 +50,9 @@ const BookingsPage: React.FC = () => {
 
  const filteredBookings = bookings.filter(b => filter === 'all' || b.status === filter);
 
- const getStatusColor = (status: BookingStatus) => {
+ const getStatusClasses = (status: BookingStatus) => {
  const option = STATUS_OPTIONS.find(s => s.value === status);
- return option?.color || 'slate';
+ return option?.lightColorClass || 'bg-slate-100 text-slate-600';
  };
 
  if (loading) {
@@ -91,7 +91,7 @@ const BookingsPage: React.FC = () => {
  onClick={() => setFilter(opt.value)}
  className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${
  filter === opt.value
- ? `bg-${opt.color}-600 text-white`
+ ? `${opt.colorClass} text-white`
  : 'bg-slate-100 text-slate-600 border border-slate-300 '
  }`}
  >
@@ -121,7 +121,7 @@ const BookingsPage: React.FC = () => {
  <h3 className="font-bold text-slate-900 text-lg">{booking.listingName}</h3>
  <p className="text-sm text-slate-500 ">{booking.consumerName}</p>
  </div>
- <span className={`px-3 py-1 rounded-lg text-xs font-bold uppercase bg-${getStatusColor(booking.status)}-500/10 text-${getStatusColor(booking.status)}-500`}>
+ <span className={`px-3 py-1 rounded-lg text-xs font-bold uppercase ${getStatusClasses(booking.status)}`}>
  {booking.status.replace('_', ' ')}
  </span>
  </div>
@@ -190,7 +190,7 @@ const BookingsPage: React.FC = () => {
  <button
  key={opt.value}
  onClick={() => handleStatusChange(selectedBooking.id, opt.value)}
- className={`px-3 py-2 rounded-lg text-xs font-bold bg-${opt.color}-500/10 text-${opt.color}-500 hover:bg-${opt.color}-500/20 transition-colors`}
+ className={`px-3 py-2 rounded-lg text-xs font-bold ${opt.lightColorClass} hover:opacity-80 transition-opacity`}
  >
  {opt.label}
  </button>

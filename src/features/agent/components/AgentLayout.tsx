@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { User } from '../../../types';
 import { useAuth } from '../../auth/context/AuthContext';
+import { countNewLeads } from '../../../services/leadService';
 
 interface AgentLayoutProps {
  user: User;
@@ -26,6 +28,13 @@ const AgentLayout: React.FC = () => {
  const [sidebarOpen, setSidebarOpen] = useState(false);
 
  if (!user) return null;
+
+ const { data: newLeadsCount } = useQuery({
+   queryKey: ['new-leads-count', user.id],
+   queryFn: () => countNewLeads(user.id),
+   enabled: !!user.id,
+   refetchInterval: 30000, // Poll every 30s
+ });
 
  const handleLogout = async () => {
  try {
@@ -104,7 +113,7 @@ const AgentLayout: React.FC = () => {
  </svg>
  <span className="hidden md:inline">{item.label}</span>
  <span className="md:hidden text-xs">{item.label}</span>
- {item.color === 'amber' && (
+ {item.label === 'Leads' && (newLeadsCount || 0) > 0 && (
  <span className="ml-auto w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
  )}
  </NavLink>
@@ -116,9 +125,9 @@ const AgentLayout: React.FC = () => {
  <div className="flex items-center gap-3 p-3 bg-white border border-slate-100 rounded-xl mb-3">
  <div className="w-10 h-10 rounded-xl overflow-hidden bg-slate-800 flex items-center justify-center font-black text-slate-400 text-lg">
  {user.avatar ? (
-  <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover" />
+ <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover" />
 ) : (
-  <span>{user.name?.charAt(0).toUpperCase()}</span>
+ <span>{user.name?.charAt(0).toUpperCase()}</span>
 )}
  </div>
  <div className="flex-1 min-w-0">

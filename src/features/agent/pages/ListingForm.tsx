@@ -22,11 +22,11 @@ const CATEGORIES = [
 
 const listingSchema = z.object({
   category: z.nativeEnum(VehicleCategory),
-  make: z.string().min(1, 'Make is required'),
-  model: z.string().min(1, 'Model is required'),
-  year: z.coerce.number().min(1990).max(new Date().getFullYear() + 1),
-  location: z.string().min(1, 'Location is required'),
-  description: z.string().min(1, 'Description is required'),
+  make: z.string().min(2, 'Make must be at least 2 characters'),
+  model: z.string().min(2, 'Model must be at least 2 characters'),
+  year: z.coerce.number().min(1990).max(new Date().getFullYear()),
+  location: z.string().min(3, 'Location must be at least 3 characters'),
+  description: z.string().min(10, 'Description should be at least 10 characters'),
   specifications: z.array(z.string()),
   imageUrls: z.array(z.string()).min(1, 'At least one image is required'),
   status: z.string().optional(),
@@ -48,6 +48,23 @@ const ListingForm: React.FC = () => {
   const [submitErrors, setSubmitErrors] = useState<string[]>([]);
   const [specInput, setSpecInput] = useState('');
   const [widgetLoading, setWidgetLoading] = useState(false);
+  const [canProceed, setCanProceed] = useState(true);
+
+  useEffect(() => {
+    const checkAccess = async () => {
+      if (agentId && !isEditing) {
+        const canPublish = await canPublishListing(agentId);
+        if (!canPublish.allowed) {
+          setSubmitErrors([
+            canPublish.reason || 'Subscription limit reached.',
+            'You cannot add more vehicles at this time.'
+          ]);
+          setCanProceed(false);
+        }
+      }
+    };
+    checkAccess();
+  }, [agentId, isEditing]);
   
   // React Query Fetching
   const { isLoading: loading } = useQuery({
@@ -340,8 +357,8 @@ const ListingForm: React.FC = () => {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-6 border-t border-slate-200 ">
-          <button type="submit" name="draft" disabled={saving} className="px-6 sm:px-8 py-3 sm:py-4 bg-slate-200 hover:bg-slate-300 text-slate-900 rounded-xl font-bold transition-colors disabled:opacity-50 text-sm sm:text-base">Save as Draft</button>
-          <button type="submit" name="publish" disabled={saving} className="flex-1 px-6 sm:px-8 py-3 sm:py-4 bg-brand-main hover:bg-brand-main/90 text-white rounded-xl font-bold transition-colors disabled:opacity-50 flex items-center justify-center gap-2 text-sm sm:text-base">
+          <button type="submit" name="draft" disabled={saving || !canProceed} className="px-6 sm:px-8 py-3 sm:py-4 bg-slate-200 hover:bg-slate-300 text-slate-900 rounded-xl font-bold transition-colors disabled:opacity-50 text-sm sm:text-base">Save as Draft</button>
+          <button type="submit" name="publish" disabled={saving || !canProceed} className="flex-1 px-6 sm:px-8 py-3 sm:py-4 bg-brand-main hover:bg-brand-main/90 text-white rounded-xl font-bold transition-colors disabled:opacity-50 flex items-center justify-center gap-2 text-sm sm:text-base">
             {saving && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
             {isEditing ? 'Update & Publish' : 'Publish Listing'}
           </button>

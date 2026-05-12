@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Listing, ListingStatus, VehicleCategory, isBookableCategory } from '../../../types';
 import { getListingsByAgent, updateListingStatus } from '../../../services/listingService';
 import { canPublishListing } from '../../../services/subscriptionService';
@@ -10,6 +10,7 @@ const FleetManagement: React.FC = () => {
  const { currentUser: user } = useAuth();
  const agentId = user?.id || '';
  if (!user) return null;
+ const navigate = useNavigate();
  const queryClient = useQueryClient();
  const [filter, setFilter] = useState<'all' | 'active' | 'paused' | 'draft'>('all');
 
@@ -87,19 +88,21 @@ const FleetManagement: React.FC = () => {
  Limit Reached
  </span>
  )}
- <Link
- to="/agent/listings/new"
- className={`px-6 py-3 rounded-xl font-bold text-sm flex items-center gap-2 transition-all ${
- publishInfo.allowed 
- ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/20'
- : 'bg-slate-200 text-slate-500 cursor-not-allowed'
- }`}
- >
- <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
- <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
- </svg>
- Add Vehicle
- </Link>
+ <button
+          onClick={() => publishInfo.allowed ? navigate('/agent/listings/new') : null}
+          disabled={!publishInfo.allowed}
+          className={`px-6 py-3 rounded-xl font-bold text-sm flex items-center gap-2 transition-all ${
+            publishInfo.allowed 
+              ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/20'
+              : 'bg-slate-200 text-slate-400 cursor-not-allowed opacity-60'
+          }`}
+          title={!publishInfo.allowed ? "Subscription limit reached" : ""}
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+          </svg>
+          Add Vehicle
+        </button>
  </div>
  </div>
 
@@ -219,15 +222,20 @@ const FleetManagement: React.FC = () => {
  </div>
  <h3 className="text-xl font-black text-slate-900 mb-2">No vehicles in your fleet</h3>
  <p className="text-slate-500 mb-8">Add your first vehicle to start receiving bookings and leads.</p>
- <Link
- to="/agent/listings/new"
- className="inline-flex items-center gap-2 px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-colors"
- >
- <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
- <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
- </svg>
- Add Your First Vehicle
- </Link>
+ <button
+          onClick={() => publishInfo.allowed ? navigate('/agent/listings/new') : null}
+          disabled={!publishInfo.allowed}
+          className={`inline-flex items-center gap-2 px-8 py-4 font-bold rounded-xl transition-colors ${
+            publishInfo.allowed
+              ? 'bg-indigo-600 hover:bg-indigo-700 text-white'
+              : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+          }`}
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+          </svg>
+          Add Your First Vehicle
+        </button>
  </div>
  )}
  </div>

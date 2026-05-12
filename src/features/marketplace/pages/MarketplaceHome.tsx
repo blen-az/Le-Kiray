@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { VehicleCategory, Listing } from '../../../types';
 import { getListings } from '../../../services/listingService';
 import VehicleCard from '../components/VehicleCard';
@@ -9,8 +9,11 @@ import BookingFlow from '../../booking/components/BookingFlow';
 
 const MarketplaceHome: React.FC = () => {
  const navigate = useNavigate();
+ const [searchParams] = useSearchParams();
+ const initialCategory = (searchParams.get('category') as VehicleCategory) || 'ALL';
+
  const [selectedVehicle, setSelectedVehicle] = useState<Listing | null>(null);
- const [categoryFilter, setCategoryFilter] = useState<VehicleCategory | 'ALL'>('ALL');
+ const [categoryFilter, setCategoryFilter] = useState<VehicleCategory | 'ALL'>(initialCategory);
  const [searchQuery, setSearchQuery] = useState('');
  const { 
  data, 

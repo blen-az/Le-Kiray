@@ -33,7 +33,7 @@ const DEFAULT_PLANS: SubscriptionPlan[] = [
   // Limitless Machineries
   { id: 'em-unl-3m', name: 'Enterprise (3 Months)', maxVehicles: 9999, price: 15000, durationMonths: 3, category: 'EARTH_MOVING' },
   { id: 'em-unl-6m', name: 'Enterprise (6 Months)', maxVehicles: 9999, price: 28000, durationMonths: 6, category: 'EARTH_MOVING' },
-  { id: 'em-unl-1y', name: 'Enterprise (1 Year)', maxVehicles: 9999, price: 550000, durationMonths: 12, category: 'EARTH_MOVING' },
+  { id: 'em-unl-1y', name: 'Enterprise (1 Year)', maxVehicles: 9999, price: 55000, durationMonths: 12, category: 'EARTH_MOVING' },
 
   // Contractors / Consumers
   { id: 'con-3m', name: 'Contractor (3 Months)', maxVehicles: 0, price: 6000, durationMonths: 3, category: 'CONSUMER' },
