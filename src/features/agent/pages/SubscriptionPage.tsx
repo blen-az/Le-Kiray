@@ -26,7 +26,7 @@ const SubscriptionPage: React.FC = () => {
  const usage = data?.usage || null;
  const plans = (data?.plans || []).filter(p => p.category !== 'CONSUMER');
 
- const [duration, setDuration] = React.useState<number>(3);
+ const [selectedMaxVehicles, setSelectedMaxVehicles] = React.useState<number>(5);
 
  const selectPlanMutation = useMutation({
  mutationFn: (planId: string) => createSubscription(agentId, user?.name || 'Unknown Agent', user?.email || '', planId),
@@ -147,59 +147,62 @@ const SubscriptionPage: React.FC = () => {
  {usage?.subscription ? 'Upgrade Your Plan' : 'Choose a Plan'}
  </h3>
  
- <div className="flex bg-slate-100 p-1 rounded-xl w-full md:w-auto">
- {[3, 6, 12].map((d) => (
- <button
- key={d}
- onClick={() => setDuration(d)}
- className={`flex-1 md:flex-none px-6 py-2 rounded-lg text-xs font-bold transition-all ${
- duration === d
- ? 'bg-white text-indigo-600 shadow-sm'
- : 'text-slate-500 hover:text-slate-700'
- }`}
- >
- {d === 12 ? '1 Year' : `${d} Months`}
- </button>
- ))}
- </div>
+        <div className="flex bg-slate-100 p-1 rounded-xl w-full md:w-auto">
+          {[5, 15, 9999].map((max) => (
+            <button
+              key={max}
+              onClick={() => setSelectedMaxVehicles(max)}
+              className={`flex-1 md:flex-none px-6 py-2 rounded-lg text-xs font-bold transition-all ${
+                selectedMaxVehicles === max
+                  ? 'bg-white text-indigo-600 shadow-sm'
+                  : 'text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              {max === 5 ? 'Basic' : max === 15 ? 'Professional' : 'Enterprise'}
+            </button>
+          ))}
+        </div>
  </div>
 
- <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
- {[5, 15, 9999].map(max => {
- const tierPlans = plans.filter(p => p.maxVehicles === max);
- const plan = tierPlans.find(p => p.durationMonths === duration) || tierPlans[0];
- 
- if (!plan) return null;
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {[3, 6, 12].map(duration => {
+          const durationPlans = plans.filter(p => p.durationMonths === duration);
+          const plan = durationPlans.find(p => p.maxVehicles === selectedMaxVehicles) || durationPlans[0];
+          
+          if (!plan) return null;
 
- const isCurrentPlan = usage?.subscription?.planId === plan.id;
- const isEnterprise = max === 9999;
- const isPro = max === 15;
- 
- return (
- <div 
- key={plan.id}
- className={`relative bg-white border-2 rounded-[32px] p-8 flex flex-col transition-all duration-300 ${
- isCurrentPlan
- ? 'border-indigo-500 shadow-xl shadow-indigo-500/10'
- : 'border-slate-100 hover:border-slate-200 hover:shadow-lg '
- }`}
- >
- {isPro && !isCurrentPlan && (
- <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-lg">
- Most Popular
- </div>
- )}
+          const isCurrentPlan = usage?.subscription?.planId === plan.id;
+          const isEnterprise = selectedMaxVehicles === 9999;
+          const isPro = selectedMaxVehicles === 15;
+          const isBestValue = duration === 12;
+          
+          return (
+            <div 
+              key={plan.id}
+              className={`relative bg-white border-2 rounded-[32px] p-8 flex flex-col transition-all duration-300 ${
+                isCurrentPlan
+                  ? 'border-indigo-500 shadow-xl shadow-indigo-500/10'
+                  : 'border-slate-100 hover:border-slate-200 hover:shadow-lg '
+              }`}
+            >
+              {isBestValue && (
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-emerald-600 text-white text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-lg">
+                  Best Value
+                </div>
+              )}
 
- <div className="mb-6">
- <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest inline-block mb-4 ${
- isEnterprise ? 'bg-amber-500/10 text-amber-600' : 
- isPro ? 'bg-indigo-500/10 text-indigo-600' : 
- 'bg-slate-100 text-slate-600'
- }`}>
- {isEnterprise ? 'Enterprise' : isPro ? 'Professional' : 'Basic'}
- </span>
- <h4 className="text-2xl font-black text-slate-900">{isEnterprise ? 'Limitless' : `${max} Machineries`}</h4>
- </div>
+              <div className="mb-6">
+                <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest inline-block mb-4 ${
+                  isEnterprise ? 'bg-amber-500/10 text-amber-600' : 
+                  isPro ? 'bg-indigo-500/10 text-indigo-600' : 
+                  'bg-slate-100 text-slate-600'
+                }`}>
+                  {duration === 12 ? '1 Year' : `${duration} Months`}
+                </span>
+                <h4 className="text-2xl font-black text-slate-900">
+                  {isEnterprise ? 'Enterprise' : isPro ? 'Professional' : 'Basic'}
+                </h4>
+              </div>
 
  <div className="flex items-baseline gap-1 mb-8">
  <span className="text-4xl font-black text-slate-900 ">{plan.price.toLocaleString()}</span>
@@ -213,7 +216,7 @@ const SubscriptionPage: React.FC = () => {
  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
  </svg>
  </div>
- {isEnterprise ? 'Unlimited fleet size' : `Up to ${max} vehicles`}
+ {isEnterprise ? 'Unlimited fleet size' : `Up to ${plan.maxVehicles} vehicles`}
  </li>
  <li className="flex items-center gap-3 text-sm text-slate-600 font-medium">
  <div className="w-5 h-5 rounded-full bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
