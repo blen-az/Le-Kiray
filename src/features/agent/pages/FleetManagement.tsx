@@ -5,6 +5,7 @@ import { Listing, ListingStatus, VehicleCategory, isBookableCategory } from '../
 import { getListingsByAgent, updateListingStatus } from '../../../services/listingService';
 import { canPublishListing } from '../../../services/subscriptionService';
 import { useAuth } from '../../../features/auth/context/AuthContext';
+import { seedMockListings } from '../../../utils/seedData';
 
 const FleetManagement: React.FC = () => {
  const { currentUser: user } = useAuth();
@@ -13,6 +14,7 @@ const FleetManagement: React.FC = () => {
  const navigate = useNavigate();
  const queryClient = useQueryClient();
  const [filter, setFilter] = useState<'all' | 'active' | 'paused' | 'draft'>('all');
+ const [isSeeding, setIsSeeding] = useState(false);
 
  const { data, isLoading: loading } = useQuery({
  queryKey: ['fleet-management', agentId],
@@ -102,6 +104,23 @@ const FleetManagement: React.FC = () => {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
           </svg>
           Add Vehicle
+        </button>
+        <button
+          onClick={async () => {
+            setIsSeeding(true);
+            const success = await seedMockListings(user.id, user.companyName || user.name);
+            if (success) {
+              queryClient.invalidateQueries({ queryKey: ['fleet-management', agentId] });
+            }
+            setIsSeeding(false);
+          }}
+          disabled={isSeeding}
+          className={`px-4 py-3 rounded-xl font-bold text-sm flex items-center gap-2 transition-all ${
+            isSeeding ? 'bg-slate-200 text-slate-400 cursor-not-allowed' : 'bg-white border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-50'
+          }`}
+          title="Add Fake Data"
+        >
+          {isSeeding ? 'Seeding...' : 'Seed Data'}
         </button>
  </div>
  </div>

@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { User } from '../../../types';
 import { subscribeToAuthChanges, subscribeToUserDoc, logout as firebaseLogout, auth } from '../../../services/authService';
 
@@ -13,6 +14,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
  const [currentUser, setCurrentUser] = useState<User | null>(null);
  const [loading, setLoading] = useState(true);
+ const queryClient = useQueryClient();
 
  useEffect(() => {
  let unsubscribeDoc: (() => void) | null = null;
@@ -40,6 +42,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
  const logout = async () => {
  try {
  await firebaseLogout();
+ queryClient.clear(); // Clear all react-query cache to prevent stale sessions
  setCurrentUser(null);
  } catch (error) {
  console.error('Logout failed:', error);
