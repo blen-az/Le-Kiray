@@ -45,113 +45,112 @@ const AgentLayout: React.FC = () => {
  }
  };
 
- return (
- <div className="min-h-screen bg-white flex flex-col md:flex-row">
- {/* Mobile Menu Button */}
- <button
- onClick={() => setSidebarOpen(!sidebarOpen)}
- className="md:hidden p-4 text-slate-500 hover:text-slate-900 hover:bg-slate-100 m-4 rounded-xl flex items-center gap-2"
- >
- <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
- <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={sidebarOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
- </svg>
- {sidebarOpen ? 'Close' : 'Menu'}
- </button>
+  return (
+    <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row">
+      {/* Mobile Menu Button */}
+      <button
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+        className="md:hidden p-4 text-slate-500 hover:text-slate-900 hover:bg-slate-100 m-4 rounded-xl flex items-center gap-2"
+      >
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={sidebarOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
+        </svg>
+        {sidebarOpen ? 'Close' : 'Menu'}
+      </button>
 
- {/* Sidebar Backdrop */}
- {sidebarOpen && (
- <div
- onClick={() => setSidebarOpen(false)}
- className="fixed inset-0 bg-black/50 md:hidden z-40"
- />
- )}
+      {/* Sidebar Backdrop */}
+      {sidebarOpen && (
+        <div
+          onClick={() => setSidebarOpen(false)}
+          className="fixed inset-0 bg-black/40 md:hidden z-40"
+        />
+      )}
 
- {/* Sidebar */}
- <aside className={`fixed md:static top-0 left-0 h-screen md:h-auto w-64 bg-slate-50 border-r border-slate-200 flex flex-col transition-transform transform md:translate-x-0 z-50 ${
- sidebarOpen ? 'translate-x-0' : '-translate-x-full'
- }`}>
- {/* Header */}
- <div className="p-6 border-b border-slate-200 ">
- <div className="flex items-center gap-3 justify-between">
- <div className="flex items-center gap-3">
- <div className="w-10 h-10 bg-brand-main rounded-xl flex items-center justify-center text-white font-black">
- FC
- </div>
- <div>
- <h2 className="font-black text-slate-900 text-sm">Fleet Command</h2>
- <p className="text-[10px] text-slate-500 uppercase tracking-widest">Agent Dashboard</p>
- </div>
- </div>
- {/* Close button on mobile */}
- <button
- onClick={() => setSidebarOpen(false)}
- className="md:hidden text-slate-400 hover:text-white"
- >
- <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
- <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
- </svg>
- </button>
- </div>
- </div>
+      {/* Sidebar */}
+      <aside className={`fixed md:static top-0 left-0 h-screen md:h-auto w-64 bg-white border-r border-slate-200/60 flex flex-col transition-transform transform md:translate-x-0 z-50 ${
+        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+      }`}>
+        {/* Header */}
+        <div className="p-6 border-b border-slate-100">
+          <div className="flex items-center gap-3 justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-brand-main rounded-[12px] flex items-center justify-center text-white font-extrabold shadow-md shadow-brand-main/10">
+                FC
+              </div>
+              <div>
+                <h2 className="font-extrabold text-slate-900 text-xs uppercase tracking-wider">Fleet Command</h2>
+                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5 block">Agent Console</span>
+              </div>
+            </div>
+            {/* Close button on mobile */}
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="md:hidden text-slate-400 hover:text-slate-900"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
 
- {/* Navigation */}
- <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
- {navItems.map((item) => (
- <NavLink
- key={item.path}
- to={item.path}
- className={({ isActive }) =>
- `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${
- isActive
- ? 'bg-brand-main text-white shadow-lg shadow-brand-main/20'
- : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100 '
- }`
- }
- >
- <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
- <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={item.icon} />
- </svg>
- <span className="hidden md:inline">{item.label}</span>
- <span className="md:hidden text-xs">{item.label}</span>
- {item.label === 'Leads' && (newLeadsCount || 0) > 0 && (
- <span className="ml-auto w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
- )}
- </NavLink>
- ))}
- </nav>
+        {/* Navigation */}
+        <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto">
+          {navItems.map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              className={({ isActive }) =>
+                `flex items-center gap-3.5 px-4 py-3 rounded-2xl text-xs font-bold transition-all ${
+                  isActive
+                    ? 'bg-brand-main/5 text-brand-main border border-brand-main/10 shadow-sm'
+                    : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
+                }`
+              }
+            >
+              <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={item.icon} />
+              </svg>
+              <span className="flex-1">{item.label}</span>
+              {item.label === 'Leads' && (newLeadsCount || 0) > 0 && (
+                <span className="w-2 h-2 rounded-full bg-brand-accent animate-pulse" />
+              )}
+            </NavLink>
+          ))}
+        </nav>
 
- {/* User Info */}
- <div className="p-4 border-t border-slate-200 ">
- <div className="flex items-center gap-3 p-3 bg-white border border-slate-100 rounded-xl mb-3">
- <div className="w-10 h-10 rounded-xl overflow-hidden bg-slate-800 flex items-center justify-center font-black text-slate-400 text-lg">
- {user.avatar ? (
- <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover" />
-) : (
- <span>{user.name?.charAt(0).toUpperCase()}</span>
-)}
- </div>
- <div className="flex-1 min-w-0">
- <p className="text-sm font-bold text-slate-900 truncate">{user.name}</p>
- <p className="text-[10px] text-slate-500 uppercase tracking-widest">{user.companyName || 'Agent'}</p>
- </div>
- </div>
- <button
- onClick={handleLogout}
- className="w-full px-4 py-2 bg-red-600/10 hover:bg-red-600/20 text-red-500 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2"
- >
- <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
- <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
- </svg>
- Logout
- </button>
- </div>
- </aside>
+        {/* User Info */}
+        <div className="p-4 border-t border-slate-100 bg-slate-50/50">
+          <div className="flex items-center gap-3 p-3 bg-white border border-slate-200/60 rounded-2xl mb-3 shadow-premium">
+            <div className="w-9 h-9 rounded-xl overflow-hidden bg-slate-100 flex items-center justify-center font-bold text-slate-500 text-sm border border-slate-200/60">
+              {user.avatar ? (
+                <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover" />
+              ) : (
+                <span>{user.name?.charAt(0).toUpperCase()}</span>
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-bold text-slate-900 truncate leading-none mb-1">{user.name}</p>
+              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none truncate">{user.companyName || 'Agent'}</p>
+            </div>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="w-full px-4 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-150 rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-2"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            Logout
+          </button>
+        </div>
+      </aside>
 
- {/* Main Content */}
- <main className="flex-1 overflow-auto w-full md:w-auto">
- <Outlet />
- </main>
- </div>
+      {/* Main Content */}
+      <main className="flex-1 overflow-auto w-full md:w-auto">
+        <Outlet />
+      </main>
+    </div>
  );
 };
 

@@ -44,7 +44,7 @@ const AIAssistant: React.FC = () => {
     <>
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 w-14 h-14 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full shadow-2xl shadow-indigo-500/40 flex items-center justify-center z-[100] transition-transform hover:scale-110"
+        className="fixed bottom-28 right-4 w-12 h-12 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full shadow-2xl shadow-indigo-500/40 flex items-center justify-center z-40 transition-transform hover:scale-110"
       >
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
@@ -52,7 +52,7 @@ const AIAssistant: React.FC = () => {
       </button>
 
       {isOpen && (
-        <div className="fixed bottom-24 right-6 w-80 md:w-96 h-[500px] bg-white border-2 border-slate-100 rounded-[32px] shadow-[0_40px_80px_-20px_rgba(0,0,0,0.25)] z-[100] flex flex-col overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
+        <div className="fixed bottom-48 right-4 w-80 md:w-96 h-[480px] bg-white border-2 border-slate-100 rounded-[32px] shadow-[0_40px_80px_-20px_rgba(0,0,0,0.25)] z-40 flex flex-col overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
           <div className="p-5 border-b border-slate-50 bg-white flex justify-between items-center">
             <div className="flex items-center gap-3">
               <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse shadow-sm shadow-emerald-500/50"></div>

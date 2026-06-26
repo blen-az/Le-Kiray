@@ -1,91 +1,189 @@
 @import "tailwindcss";
 @config "../../tailwind.config.js";
 
-/* Global styles for Le'Kiray Marketplace */
+/* 
+ * Le'Kiray Design System V2
+ * Custom Enterprise Construction-Tech Overhaul
+ * Airbnb Meets Stripe Meets Caterpillar Precision
+ */
 
 :root {
-  --bg-main: #f8fafc;
-  --bg-card: #ffffff;
-  --bg-input: #ffffff;
-  --text-main: #0f172a;
-  --text-muted: #475569;
-  --text-on-dark: #ffffff;
-  --border-main: #e2e8f0;
-  --brand-primary: #6366f1;
-  --brand-accent: #f59e0b;
-  --brand-success: #10b981;
+  --bg-main: #F8FAFC;       /* Concrete White */
+  --bg-card: #FFFFFF;
+  --bg-input: #FFFFFF;
+  --text-main: #0F172A;     /* Graphite */
+  --text-muted: #64748B;    /* Steel Gray */
+  --text-on-dark: #FFFFFF;
+  --border-main: #F1F5F9;
+  --brand-primary: #355CFF; /* Royal Blue */
+  --brand-accent: #FF8A00;  /* Construction Orange */
+  --brand-success: #10B981; /* Emerald */
   
-  /* Keep some original slate vars for compatibility if needed, but shifted for light theme */
-  --slate-950: #020617;
-  --slate-900: #0f172a;
-  --slate-800: #1e293b;
+  /* Slate values for legacy fallback compatibility */
+  --slate-950: #090D1A;
+  --slate-900: #0F172A;
+  --slate-800: #1E293B;
   --slate-700: #334155;
   --slate-600: #475569;
-  --slate-500: #64748b;
-  --slate-400: #94a3b8;
-  --slate-300: #cbd5e1;
-  --slate-200: #e2e8f0;
+  --slate-500: #64748B;
+  --slate-450: #7E8E9F;
+  --slate-400: #94A3B8;
+  --slate-300: #CBD5E1;
+  --slate-200: #E2E8F0;
+  --slate-100: #F1F5F9;
+  --slate-50: #F8FAFC;
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background-color: var(--bg-main);
   color: var(--text-main);
-  line-height: 1.45;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Utility class for background */
-.bg-brand-dark {
-  background-color: #020617;
+/* Blueprint / Technical CAD Grid Backdrops */
+.blueprint-grid {
+  background-color: #F8FAFC;
+  background-image: 
+    linear-gradient(to right, rgba(53, 92, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(53, 92, 255, 0.04) 1px, transparent 1px);
+  background-size: 24px 24px;
 }
 
-/* Tailwind-like utilities for animation */
-@keyframes bounce {
-  0%, 100% {
-    transform: translateY(-25%);
-    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
-  }
-  50% {
-    transform: translateY(0);
-    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
-  }
+.blueprint-grid-lg {
+  background-color: #F8FAFC;
+  background-image: 
+    linear-gradient(to right, rgba(53, 92, 255, 0.05) 1.5px, transparent 1.5px),
+    linear-gradient(to bottom, rgba(53, 92, 255, 0.05) 1.5px, transparent 1.5px);
+  background-size: 96px 96px;
 }
 
-.animate-bounce {
-  animation: bounce 1s infinite;
+.dots-grid {
+  background-image: radial-gradient(rgba(100, 116, 139, 0.15) 1.2px, transparent 1.2px);
+  background-size: 16px 16px;
 }
 
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
+/* CAD Drawing crosshairs & accents */
+.cad-corner {
+  position: relative;
+}
+.cad-corner::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; width: 8px; height: 8px;
+  border-top: 1.5px solid var(--brand-accent);
+  border-left: 1.5px solid var(--brand-accent);
+}
+.cad-corner::after {
+  content: '';
+  position: absolute;
+  bottom: 0; right: 0; width: 8px; height: 8px;
+  border-bottom: 1.5px solid var(--brand-accent);
+  border-right: 1.5px solid var(--brand-accent);
 }
 
-.animate-pulse {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+.industrial-stripes {
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--brand-accent),
+    var(--brand-accent) 6px,
+    #F1F5F9 6px,
+    #F1F5F9 12px
+  );
 }
 
-/* Mobile-friendly utilities */
-.pb-safe {
-  padding-bottom: env(safe-area-inset-bottom, 20px);
+.industrial-stripes-subtle {
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(255, 138, 0, 0.08) 0px,
+    rgba(255, 138, 0, 0.08) 8px,
+    rgba(15, 23, 42, 0.02) 8px,
+    rgba(15, 23, 42, 0.02) 16px
+  );
 }
 
-.glass {
+/* Apple VisionOS-like & Luxury Glassmorphism */
+.glass-vision {
   background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
+.glass-vision-dark {
+  background: rgba(9, 13, 26, 0.7);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.glass-nav {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(229, 231, 235, 0.4);
+}
+
+/* Premium Elevation Shadows */
+.shadow-dribbble {
+  box-shadow: 
+    0 1px 2px rgba(0, 0, 0, 0.01),
+    0 8px 24px -4px rgba(0, 0, 0, 0.02),
+    0 24px 48px -12px rgba(53, 92, 255, 0.04);
+}
+
+.shadow-dribbble-hover {
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.shadow-dribbble-hover:hover {
+  transform: translateY(-6px);
+  box-shadow: 
+    0 20px 48px -10px rgba(0, 0, 0, 0.04),
+    0 1px 3px rgba(53, 92, 255, 0.03),
+    0 30px 70px -15px rgba(53, 92, 255, 0.12);
+  border-color: rgba(53, 92, 255, 0.2);
+}
+
+.shadow-floating {
+  box-shadow: 
+    0 2px 4px rgba(53, 92, 255, 0.01),
+    0 16px 32px rgba(53, 92, 255, 0.03),
+    0 32px 64px rgba(53, 92, 255, 0.06);
+}
+
+/* Gradient borders and glows */
+.card-premium-glow {
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card-premium-glow::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: linear-gradient(135deg, rgba(53, 92, 255, 0.25) 0%, rgba(255, 138, 0, 0.25) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0.3;
+  transition: opacity 0.3s ease;
+}
+
+.card-premium-glow:hover::before {
+  opacity: 1;
+}
+
+/* Animations */
 @keyframes slide-up {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(24px);
   }
   to {
     opacity: 1;
@@ -94,11 +192,18 @@ body {
 }
 
 @keyframes fade-in {
-  from {
-    opacity: 0;
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 0.6;
+    box-shadow: 0 0 0 0 rgba(53, 92, 255, 0.2);
   }
-  to {
+  50% {
     opacity: 1;
+    box-shadow: 0 0 12px 4px rgba(53, 92, 255, 0.4);
   }
 }
 
@@ -107,42 +212,89 @@ body {
 }
 
 .animate-fade-in {
-  animation: fade-in 1s ease-out forwards;
+  animation: fade-in 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.glass-dark {
-  background: rgba(15, 23, 42, 0.6);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* Custom Scroll bar for mobile */
-@media (max-width: 768px) {
-  ::-webkit-scrollbar {
-    display: none;
-  }
-}
-
-::selection {
-  background-color: var(--brand-accent);
-  color: #000;
-}
-
-/* Scroll bar styling */
+/* Custom Scrollbars */
 ::-webkit-scrollbar {
   width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--slate-100);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--slate-300);
-  border-radius: 4px;
+  background: rgba(100, 116, 139, 0.25);
+  border-radius: 9999px;
+  border: 2px solid var(--bg-main);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--slate-400);
+  background: rgba(100, 116, 139, 0.45);
+}
+
+/* Selection Highlight */
+::selection {
+  background-color: rgba(255, 138, 0, 0.2);
+  color: #0F172A;
+}
+
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 24px);
+}
+
+/* CAD blueprint drawing guides & technical utilities */
+.cad-crosshair-x {
+  position: relative;
+}
+.cad-crosshair-x::before {
+  content: '';
+  position: absolute;
+  left: -8px;
+  right: -8px;
+  top: 50%;
+  height: 0.5px;
+  background: rgba(53, 92, 255, 0.08);
+  pointer-events: none;
+}
+
+.cad-crosshair-y {
+  position: relative;
+}
+.cad-crosshair-y::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  bottom: -8px;
+  left: 50%;
+  width: 0.5px;
+  background: rgba(53, 92, 255, 0.08);
+  pointer-events: none;
+}
+
+.blueprint-border {
+  border: 1px dashed rgba(53, 92, 255, 0.15);
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(53, 92, 255, 0.05);
+}
+
+.gradient-text-brand {
+  background: linear-gradient(135deg, #355CFF 0%, #FF8A00 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }

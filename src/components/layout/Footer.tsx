@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 const Footer: React.FC = () => {
   return (
     <footer className="bg-white border-t border-slate-200 text-slate-500 py-12 px-4">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
+      <div className="w-full px-8 md:px-12 grid grid-cols-1 md:grid-cols-4 gap-8">
         <div className="col-span-1 md:col-span-2">
           <h3 className="text-slate-900 text-xl font-bold mb-4">Le'Kiray</h3>
           <p className="max-w-sm mb-6 text-sm">
@@ -40,7 +40,7 @@ const Footer: React.FC = () => {
           </ul>
         </div>
       </div>
-      <div className="max-w-7xl mx-auto border-t border-slate-100 mt-12 pt-8 text-center text-[10px] font-bold uppercase tracking-widest text-slate-400">
+      <div className="w-full px-8 md:px-12 border-t border-slate-100 mt-12 pt-8 text-center text-[10px] font-bold uppercase tracking-widest text-slate-400">
         &copy; {new Date().getFullYear()} Le'Kiray Marketplace. All rights reserved.
       </div>
     </footer>

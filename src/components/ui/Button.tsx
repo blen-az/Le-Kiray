@@ -15,21 +15,21 @@ export const Button: React.FC<ButtonProps> = ({
  disabled,
  ...props
 }) => {
- const baseStyles = 'font-bold rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed';
- 
- const variants = {
- primary: 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/20',
- secondary: 'bg-slate-800 hover:bg-slate-700 text-white border border-slate-700',
- danger: 'bg-red-500/10 hover:bg-red-500/20 text-red-500',
- warning: 'bg-amber-600 hover:bg-amber-500 text-white shadow-lg shadow-amber-900/30',
- ghost: 'hover:bg-slate-800 text-slate-400 hover:text-white',
- };
+  const baseStyles = 'font-bold rounded-2xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-0.5 active:translate-y-0 duration-200 btn-ripple';
+  
+  const variants = {
+    primary: 'bg-brand-main hover:bg-brand-main/90 text-white shadow-md shadow-brand-main/10 hover:shadow-lg hover:shadow-brand-main/20',
+    secondary: 'bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 shadow-sm',
+    danger: 'bg-red-50 hover:bg-red-100 text-red-600 border border-red-200',
+    warning: 'bg-brand-accent hover:bg-brand-accent/90 text-white shadow-md shadow-brand-accent/10 hover:shadow-lg hover:shadow-brand-accent/20',
+    ghost: 'hover:bg-slate-100 text-slate-600 hover:text-slate-900',
+  };
 
- const sizes = {
- sm: 'px-4 py-2 text-xs',
- md: 'px-6 py-3 text-sm',
- lg: 'px-8 py-4 text-base',
- };
+  const sizes = {
+    sm: 'px-4 py-2 text-xs',
+    md: 'px-5 py-3 text-sm',
+    lg: 'px-7 py-4 text-base',
+  };
 
  return (
  <button
